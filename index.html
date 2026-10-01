@@ -8,28 +8,19 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Google Fonts (Noto Sans KR & Gaegu) -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: {
-            sans: ['"Noto Sans KR"', 'sans-serif'],
-            title: ['"Gaegu"', 'cursive', 'sans-serif']
-          },
+          fontFamily: { sans: ['"Noto Sans KR"', 'sans-serif'], title: ['"Gaegu"', 'cursive'] },
           colors: {
             sanrio: {
-              pink: '#FFB7C5',
-              softPink: '#FFF0F3',
-              deepPink: '#FF6584',
-              blue: '#A0E7E5',
-              softBlue: '#E8F7F8',
-              lavender: '#E2D4F0',
-              yellow: '#FCE38A',
-              cream: '#FFFDF9'
+              pink: '#FFB7C5', softPink: '#FFF0F3', deepPink: '#FF6584',
+              blue: '#A0E7E5', softBlue: '#E8F7F8', yellow: '#FCE38A'
             }
           }
         }
@@ -40,14 +31,14 @@
     body { background-color: #FAF8F5; }
     .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scroll::-webkit-scrollbar-thumb { background-color: #FFB7C5; border-radius: 9999px; }
-    .character-avatar { transition: transform 0.2s ease; }
-    .character-avatar:hover { transform: scale(1.1); }
+    .char-avatar { transition: transform 0.2s ease; }
+    .char-avatar:hover { transform: scale(1.1); }
   </style>
 </head>
 <body class="text-gray-800 antialiased min-h-screen flex flex-col">
 
   <!-- Header -->
-  <header class="bg-white/85 backdrop-blur border-b border-pink-100 sticky top-0 z-50 shadow-sm">
+  <header class="bg-white/90 backdrop-blur border-b border-pink-100 sticky top-0 z-50 shadow-sm">
     <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
       <div class="flex items-center space-x-2">
         <span class="text-2xl animate-bounce">🎀</span>
@@ -56,28 +47,28 @@
         </h1>
       </div>
       <div class="flex items-center gap-2 text-sm">
-        <button id="refreshBtn" onclick="loadAllData(true)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sanrio-softPink text-sanrio-deepPink font-medium hover:bg-pink-100 transition shadow-sm border border-pink-200">
+        <button id="refreshBtn" onclick="loadAllData(true)" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-sanrio-softPink text-sanrio-deepPink font-semibold hover:bg-pink-100 transition shadow-sm border border-pink-200">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
           실시간 동기화
         </button>
-        <button onclick="toggleConfigModal()" class="p-1.5 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition" title="시트 연동 설정">
+        <button onclick="toggleConfigModal()" class="p-1.5 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition" title="시트 설정">
           ⚙️
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Status / Alert Banner -->
+  <!-- Status Banner -->
   <div id="statusBanner" class="bg-amber-50 border-b border-amber-200 text-amber-800 text-xs px-4 py-2 text-center hidden">
-    <span id="statusMessage">데이터를 불러오는 중입니다...</span>
+    <span id="statusMessage">데이터를 동기화하는 중입니다...</span>
   </div>
 
-  <!-- Main Container -->
-  <main class="max-w-6xl mx-auto px-4 py-6 flex-1 w-full space-y-8">
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
 
     <!-- Navigation Tabs -->
     <div class="flex justify-center border-b border-gray-200">
-      <nav class="flex space-x-4 md:space-x-8">
+      <nav class="flex space-x-6 md:space-x-10">
         <button id="tabBtnRanking" onclick="switchTab('ranking')" class="py-3 px-3 border-b-2 border-sanrio-deepPink text-sanrio-deepPink font-bold text-base md:text-lg flex items-center gap-1.5">
           🏆 연도별 순위 & 득표수
         </button>
@@ -89,17 +80,16 @@
 
     <!-- TAB 1: 연도별 순위 & 득표수 -->
     <section id="tabRanking" class="space-y-6">
+      <!-- Filter Bar -->
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-pink-100 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div class="flex items-center gap-3 w-full md:w-auto">
-          <label class="font-bold text-gray-700 whitespace-nowrap flex items-center gap-1">
-            <span>📅</span> 연도 선택:
-          </label>
+          <label class="font-bold text-gray-700 whitespace-nowrap">📅 연도 선택:</label>
           <select id="yearSelect" onchange="renderRankingView()" class="bg-sanrio-softPink/70 border border-pink-200 text-gray-800 font-bold rounded-xl px-4 py-2 focus:ring-2 focus:ring-sanrio-deepPink outline-none cursor-pointer">
           </select>
         </div>
 
         <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          <!-- Rank Range Filter -->
+          <!-- Rank Limit Filter -->
           <div class="inline-flex rounded-xl p-1 bg-gray-100 text-xs font-semibold">
             <button onclick="setRankLimit(10)" id="filter10" class="px-3.5 py-1.5 rounded-lg bg-white shadow-sm text-sanrio-deepPink font-bold transition flex items-center gap-1">
               <span>🌟</span> TOP 10 (득표수 연동)
@@ -116,17 +106,17 @@
         </div>
       </div>
 
-      <!-- TOP 3 Podium Cards -->
-      <div id="podiumSection" class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2"></div>
+      <!-- TOP 3 Podium -->
+      <div id="podiumSection" class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1"></div>
 
-      <!-- TOP 10 Dedicated Vote Chart -->
+      <!-- TOP 10 Vote Comparison Chart -->
       <div id="top10VoteVisualCard" class="bg-white p-5 rounded-2xl shadow-sm border border-pink-100 space-y-3 hidden">
         <div class="flex justify-between items-center">
           <h3 class="font-bold text-gray-800 text-base md:text-lg flex items-center gap-2">
             📊 <span id="top10VoteChartTitle">TOP 10 득표수 순위 비교 차트</span>
           </h3>
           <span class="text-xs text-sanrio-deepPink font-semibold bg-pink-50 px-2.5 py-1 rounded-full border border-pink-200">
-            실시간 시트 연동 득표 데이터
+            구글 시트 실시간 연동
           </span>
         </div>
         <div class="relative h-60 md:h-72 w-full">
@@ -134,7 +124,7 @@
         </div>
       </div>
 
-      <!-- Ranking List / Table -->
+      <!-- Ranking Table -->
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-pink-50/40">
           <h2 class="font-bold text-gray-800 text-base md:text-lg flex items-center gap-2">
@@ -175,14 +165,14 @@
           </div>
         </div>
         <div class="text-xs text-gray-500 bg-gray-50 px-3.5 py-2.5 rounded-xl border border-gray-200/80 w-full md:w-auto">
-          💡 2012년부터 최신 연도까지의 순위 변동 그래프와 TOP 10 득표 추이를 확인합니다.
+          💡 역대 순위 변동 그래프(Y축 반전)와 TOP 10 진입 시 득표 추이를 분석합니다.
         </div>
       </div>
 
-      <!-- Character Summary Stats Cards -->
+      <!-- Stats Row -->
       <div id="characterStatsRow" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
 
-      <!-- Rank Chart Card -->
+      <!-- Line Chart -->
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
         <div class="flex justify-between items-center">
           <h3 class="font-bold text-gray-800 text-base md:text-lg flex items-center gap-2">
@@ -195,13 +185,13 @@
         </div>
       </div>
 
-      <!-- Votes Chart Card -->
+      <!-- Votes Chart -->
       <div id="votesChartCard" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
         <div class="flex justify-between items-center">
           <h3 class="font-bold text-gray-800 text-base md:text-lg flex items-center gap-2">
             🗳️ <span id="voteChartTitle">TOP 10 득표수 추이</span>
           </h3>
-          <span class="text-xs text-gray-400">* TOP 10 득표수가 공개된 연도 기준</span>
+          <span class="text-xs text-gray-400">* TOP 10 득표수 공개 연도 기준</span>
         </div>
         <div class="relative h-64 md:h-80 w-full">
           <canvas id="votesHistoryChart"></canvas>
@@ -211,7 +201,7 @@
 
   </main>
 
-  <!-- Configuration Modal -->
+  <!-- Settings Modal -->
   <div id="configModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-pink-100">
       <div class="flex justify-between items-center">
@@ -221,7 +211,7 @@
         <button onclick="toggleConfigModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
       </div>
       <div class="text-sm text-gray-600 space-y-3">
-        <p>스프레드시트에 새 연도(예: 2027)를 추가하거나 순위/득표수를 수정하면 웹사이트에 자동으로 실시간 반영됩니다.</p>
+        <p>시트에 새로운 연도(예: 2027)를 추가하거나 순위/득표수를 수정하면 웹사이트에 자동으로 실시간 반영됩니다.</p>
         <div>
           <label class="block text-xs font-bold text-gray-700 mb-1">스프레드시트 ID:</label>
           <input type="text" id="cfgSpreadsheetId" class="w-full px-3 py-2 border rounded-xl text-sm font-mono bg-gray-50 focus:bg-white focus:ring-2 focus:ring-sanrio-deepPink outline-none">
@@ -231,7 +221,7 @@
           <ol class="list-decimal pl-4 space-y-0.5">
             <li>스프레드시트 우측 상단 <strong>[공유]</strong> 클릭</li>
             <li>일반 액세스를 <strong>'링크가 있는 모든 사용자 - 뷰어'</strong>로 설정</li>
-            <li>위 설정을 완료하면 별도의 API 키 없이 브라우저에서 바로 실시간 데이터를 불러옵니다.</li>
+            <li>웹사이트에서 [실시간 동기화]를 누르면 언제든지 최신 내용으로 갱신됩니다.</li>
           </ol>
         </div>
       </div>
@@ -256,7 +246,6 @@
     const SHEET_VOTES = 'TOP10 득표수 상세';
 
     let currentSpreadsheetId = localStorage.getItem('sanrio_sheet_id') || DEFAULT_SPREADSHEET_ID;
-    
     let years = []; 
     let rankingsByYear = {}; 
     let characterSet = new Set();
@@ -266,7 +255,6 @@
     let votesChartInstance = null;
     let top10BarChartInstance = null;
 
-    // Character Image Mapping
     const CHARACTER_IMAGES = {
       '시나모롤': 'https://upload.wikimedia.org/wikipedia/en/a/a9/Cinnamoroll_character_portrait.png',
       '폼폼푸린': 'https://upload.wikimedia.org/wikipedia/en/b/b8/Pompompurin_character_portrait.png',
@@ -290,27 +278,23 @@
       '마론크림': 'https://upload.wikimedia.org/wikipedia/en/6/6f/Marron_Cream_character_portrait.png',
       '디어다니엘': 'https://upload.wikimedia.org/wikipedia/en/c/c3/Dear_Daniel_character_portrait.png',
       '챠미키티': 'https://upload.wikimedia.org/wikipedia/en/7/7c/Charmmy_Kitty_character_portrait.png',
-      '쇼바이락': 'https://upload.wikimedia.org/wikipedia/en/8/87/Show_by_Rock%21%21_logo.png',
       '요시키티': 'https://upload.wikimedia.org/wikipedia/en/7/76/Yoshikitty_character_portrait.png',
       '본본리본': 'https://upload.wikimedia.org/wikipedia/en/2/20/Bonbonribbon_character_portrait.png',
       '슈가바니즈': 'https://upload.wikimedia.org/wikipedia/en/d/d3/Sugarbunnies_character_portrait.png',
       '어그레시브 레츠코': 'https://upload.wikimedia.org/wikipedia/en/8/84/Aggretsuko_character_portrait.png',
-      '하나마루오바케': 'https://upload.wikimedia.org/wikipedia/en/8/86/Hanamaruobake.png',
-      '고로피카돈': 'https://upload.wikimedia.org/wikipedia/en/1/18/Goropikadon.png',
-      '민나노타보': 'https://upload.wikimedia.org/wikipedia/en/b/ba/Minna_no_T%C4%81b%C5%8D.png'
+      '하나마루오바케': 'https://upload.wikimedia.org/wikipedia/en/8/86/Hanamaruobake.png'
     };
 
     function getCharacterImageHTML(characterName, size = 'w-10 h-10', textSize = 'text-sm') {
       const cleanName = characterName.replace(/\(.*\)/g, '').trim();
       const imgUrl = CHARACTER_IMAGES[cleanName] || CHARACTER_IMAGES[characterName];
       const initial = cleanName.charAt(0) || '★';
-
       const fallbackSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="%23FFE6EB"/><text x="50%" y="54%" font-family="sans-serif" font-weight="bold" font-size="22" fill="%23FF6584" text-anchor="middle" dominant-baseline="middle">${encodeURIComponent(initial)}</text></svg>`;
 
       if (imgUrl) {
-        return `<img src="${imgUrl}" alt="${characterName}" onerror="this.onerror=null; this.src='${fallbackSvg}';" class="${size} object-contain rounded-full bg-pink-50/60 p-1 border border-pink-100 character-avatar flex-shrink-0" />`;
+        return `<img src="${imgUrl}" alt="${characterName}" onerror="this.onerror=null; this.src='${fallbackSvg}';" class="${size} object-contain rounded-full bg-pink-50/60 p-1 border border-pink-100 char-avatar flex-shrink-0" />`;
       } else {
-        return `<div class="${size} rounded-full bg-pink-100/70 border border-pink-200 text-sanrio-deepPink font-bold flex items-center justify-center ${textSize} character-avatar flex-shrink-0 shadow-inner">${initial}</div>`;
+        return `<div class="${size} rounded-full bg-pink-100/70 border border-pink-200 text-sanrio-deepPink font-bold flex items-center justify-center ${textSize} char-avatar flex-shrink-0 shadow-inner">${initial}</div>`;
       }
     }
 
@@ -365,7 +349,6 @@
       document.getElementById('statusBanner').classList.add('hidden');
     }
 
-    // RFC 4180 Standard CSV Parser: Only double quotes (") are treated as delimiters
     function parseCSV(text) {
       const lines = text.trim().split(/\r\n|\n/);
       return lines.map(line => {
@@ -450,8 +433,9 @@
       const colToYear = {};
       for (let c = 1; c < headerRow.length; c++) {
         const val = headerRow[c];
-        if (val && !isNaN(parseInt(val))) {
-          const yr = val.toString().trim();
+        const match = str(val).match(/(20\d{2})/);
+        if (match) {
+          const yr = match[1];
           years.push(yr);
           colToYear[c] = yr;
         }
@@ -471,18 +455,17 @@
           const vHeader = votesRows[votesHeaderIdx];
           const vColToYear = {};
           for (let c = 1; c < vHeader.length; c++) {
-            const val = vHeader[c];
-            if (val) vColToYear[c] = val.toString().trim();
+            const m = str(vHeader[c]).match(/(20\d{2})/);
+            if (m) vColToYear[c] = m[1];
           }
           for (let r = votesHeaderIdx + 1; r < votesRows.length; r++) {
-            const rankStr = votesRows[r][0];
-            const rankNum = parseInt(rankStr);
-            if (!isNaN(rankNum) && rankNum <= 10) {
+            const rankNum = parseInt(votesRows[r][0]);
+            if (!isNaN(rankNum) && rankNum >= 1 && rankNum <= 10) {
               for (let c = 1; c < votesRows[r].length; c++) {
                 const yr = vColToYear[c];
                 if (yr) {
                   if (!votesMap[yr]) votesMap[yr] = {};
-                  const voteValStr = votesRows[r][c] ? votesRows[r][c].replace(/,/g, '').trim() : '';
+                  const voteValStr = (votesRows[r][c] || '').replace(/,/g, '').trim();
                   const voteNum = parseInt(voteValStr);
                   if (!isNaN(voteNum) && voteNum > 0) {
                     votesMap[yr][rankNum] = voteNum;
@@ -495,5 +478,462 @@
       }
 
       rankingsByYear = {};
+      characterSet.clear();
+      years.forEach(yr => rankingsByYear[yr] = []);
 
-http://googleusercontent.com/action_card_content/b2fea7bf-ef6a-46c2-a7d3-c2fc627f6b0e
+      for (let r = headerRowIdx + 1; r < rankingRows.length; r++) {
+        const rankNum = parseInt(rankingRows[r][0]);
+        if (isNaN(rankNum)) continue;
+
+        for (let c = 1; c < rankingRows[r].length; c++) {
+          const yr = colToYear[c];
+          if (yr) {
+            const charName = (rankingRows[r][c] || '').trim();
+            if (charName && charName !== '데이터 미상' && charName !== '-' && !charName.includes(',",",","')) {
+              characterSet.add(charName);
+              const votes = (votesMap[yr] && votesMap[yr][rankNum]) ? votesMap[yr][rankNum] : null;
+              rankingsByYear[yr].push({
+                rank: rankNum,
+                name: charName,
+                votes: votes
+              });
+            }
+          }
+        }
+      }
+
+      populateYearSelector();
+      populateCharacterSelector();
+      renderRankingView();
+      renderHistoryView();
+    }
+
+    function str(val) {
+      return (val || '').toString();
+    }
+
+    function populateYearSelector() {
+      const yearSelect = document.getElementById('yearSelect');
+      const prevVal = yearSelect.value;
+      yearSelect.innerHTML = '';
+      
+      const sortedYears = [...years].sort((a, b) => parseInt(b) - parseInt(a));
+      sortedYears.forEach(yr => {
+        const opt = document.createElement('option');
+        opt.value = yr;
+        opt.textContent = `${yr}년 결과`;
+        yearSelect.appendChild(opt);
+      });
+
+      if (sortedYears.includes(prevVal)) {
+        yearSelect.value = prevVal;
+      } else if (sortedYears.length > 0) {
+        yearSelect.value = sortedYears[0];
+      }
+    }
+
+    function populateCharacterSelector() {
+      const charSelect = document.getElementById('characterHistorySelect');
+      const prevVal = charSelect.value;
+      charSelect.innerHTML = '';
+
+      const popularPriority = ['시나모롤', '폼폼푸린', '포차코', '쿠로미', '헬로키티', '마이멜로디', '한교동', '리틀트윈스타', '턱시도샘', '아히루노페클', '코기뮹', '케로케로케로피', '구데타마'];
+      const sortedChars = Array.from(characterSet).sort((a, b) => {
+        const idxA = popularPriority.indexOf(a);
+        const idxB = popularPriority.indexOf(b);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return a.localeCompare(b, 'ko');
+      });
+
+      sortedChars.forEach(char => {
+        const opt = document.createElement('option');
+        opt.value = char;
+        opt.textContent = char;
+        charSelect.appendChild(opt);
+      });
+
+      if (sortedChars.includes(prevVal)) {
+        charSelect.value = prevVal;
+      } else if (sortedChars.length > 0) {
+        charSelect.value = sortedChars[0];
+      }
+    }
+
+    function setRankLimit(limit) {
+      currentLimit = limit;
+      ['10', '30', '100'].forEach(l => {
+        const btn = document.getElementById(`filter${l}`);
+        if (parseInt(l) === limit) {
+          btn.className = 'px-3.5 py-1.5 rounded-lg bg-white shadow-sm text-sanrio-deepPink font-bold transition flex items-center gap-1';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-lg text-gray-600 hover:text-gray-900 transition';
+        }
+      });
+      renderRankingView();
+    }
+
+    function switchTab(tab) {
+      const tabRanking = document.getElementById('tabRanking');
+      const tabHistory = document.getElementById('tabHistory');
+      const btnRanking = document.getElementById('tabBtnRanking');
+      const btnHistory = document.getElementById('tabBtnHistory');
+
+      if (tab === 'ranking') {
+        tabRanking.classList.remove('hidden');
+        tabHistory.classList.add('hidden');
+        btnRanking.className = 'py-3 px-3 border-b-2 border-sanrio-deepPink text-sanrio-deepPink font-bold text-base md:text-lg flex items-center gap-1.5';
+        btnHistory.className = 'py-3 px-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-base md:text-lg flex items-center gap-1.5';
+      } else {
+        tabRanking.classList.add('hidden');
+        tabHistory.classList.remove('hidden');
+        btnRanking.className = 'py-3 px-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-base md:text-lg flex items-center gap-1.5';
+        btnHistory.className = 'py-3 px-3 border-b-2 border-sanrio-deepPink text-sanrio-deepPink font-bold text-base md:text-lg flex items-center gap-1.5';
+        renderHistoryView();
+      }
+    }
+
+    function getPreviousRank(characterName, targetYear) {
+      const yrNum = parseInt(targetYear);
+      const prevYr = (yrNum - 1).toString();
+      if (!rankingsByYear[prevYr]) return null;
+      const found = rankingsByYear[prevYr].find(i => i.name === characterName);
+      return found ? found.rank : null;
+    }
+
+    function renderRankingView() {
+      const selectedYear = document.getElementById('yearSelect').value;
+      const searchQuery = document.getElementById('characterSearch').value.trim().toLowerCase();
+      const list = rankingsByYear[selectedYear] || [];
+
+      document.getElementById('rankingTableTitle').innerText = `${selectedYear}년 산리오 캐릭터 대상 순위`;
+
+      let filtered = list.filter(item => {
+        if (!searchQuery) return item.rank <= currentLimit;
+        return item.name.toLowerCase().includes(searchQuery);
+      });
+
+      document.getElementById('rankingCountBadge').innerText = `표시: ${filtered.length}개`;
+
+      // Render Podium (TOP 3)
+      const podium = document.getElementById('podiumSection');
+      if (!searchQuery && list.length >= 3) {
+        const top1 = list.find(i => i.rank === 1);
+        const top2 = list.find(i => i.rank === 2);
+        const top3 = list.find(i => i.rank === 3);
+
+        const renderPodiumCard = (item, medal, bgColor, borderColor, orderClass) => {
+          if (!item) return '';
+          const votesStr = item.votes ? item.votes.toLocaleString() + '표' : '득표수 집계 중';
+          return `
+            <div class="${orderClass} ${bgColor} border ${borderColor} rounded-3xl p-5 shadow-sm hover:shadow-md transition text-center relative overflow-hidden flex flex-col justify-between items-center group">
+              <div class="text-3xl mb-1">${medal}</div>
+              <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">${item.rank}위</div>
+              <div class="my-2 p-1.5 bg-white/80 rounded-2xl shadow-sm border border-pink-100">
+                ${getCharacterImageHTML(item.name, 'w-20 h-20 md:w-24 md:h-24', 'text-2xl')}
+              </div>
+              <h3 class="text-xl md:text-2xl font-black text-gray-800 my-1 group-hover:text-sanrio-deepPink transition">${item.name}</h3>
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-pink-200 text-sm font-bold text-sanrio-deepPink shadow-sm mt-1">
+                <span>🗳️</span> ${votesStr}
+              </div>
+              <button onclick="viewCharacterHistory('${item.name}')" class="mt-3 text-xs text-gray-500 hover:text-sanrio-deepPink underline transition font-medium">
+                역대 추이 분석 →
+              </button>
+            </div>
+          `;
+        };
+
+        podium.innerHTML = `
+          ${renderPodiumCard(top2, '🥈', 'bg-slate-50', 'border-slate-200', 'order-2 md:order-1')}
+          ${renderPodiumCard(top1, '🥇', 'bg-amber-50', 'border-amber-200 ring-2 ring-amber-300', 'order-1 md:order-2 scale-105 z-10')}
+          ${renderPodiumCard(top3, '🥉', 'bg-orange-50', 'border-orange-200', 'order-3 md:order-3')}
+        `;
+        podium.classList.remove('hidden');
+      } else {
+        podium.classList.add('hidden');
+      }
+
+      // Render TOP 10 Visual Bar Chart (Only when TOP 10 active and no search)
+      const top10Card = document.getElementById('top10VoteVisualCard');
+      if (currentLimit === 10 && !searchQuery && list.length >= 5) {
+        top10Card.classList.remove('hidden');
+        document.getElementById('top10VoteChartTitle').innerText = `${selectedYear}년 TOP 10 득표수 순위 비교`;
+        renderTop10BarChart(list.filter(i => i.rank <= 10));
+      } else {
+        top10Card.classList.add('hidden');
+      }
+
+      const maxVotes = list.reduce((max, item) => (item.votes && item.votes > max ? item.votes : max), 0);
+
+      // Render Ranking Table
+      const tbody = document.getElementById('rankingTableBody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-gray-400">검색 결과가 없습니다.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(item => {
+        const prevRank = getPreviousRank(item.name, selectedYear);
+        let diffBadge = '<span class="text-gray-400 text-xs">-</span>';
+        if (prevRank !== null) {
+          const diff = prevRank - item.rank;
+          if (diff > 0) diffBadge = `<span class="text-rose-500 font-bold text-xs inline-flex items-center gap-0.5">▲ ${diff}</span>`;
+          else if (diff < 0) diffBadge = `<span class="text-blue-500 font-bold text-xs inline-flex items-center gap-0.5">▼ ${Math.abs(diff)}</span>`;
+        } else {
+          diffBadge = `<span class="text-emerald-500 font-bold text-xs bg-emerald-50 px-1.5 py-0.5 rounded">NEW</span>`;
+        }
+
+        let rankBadgeClass = 'text-gray-700 bg-gray-100';
+        if (item.rank === 1) rankBadgeClass = 'text-amber-800 bg-amber-100 font-black ring-1 ring-amber-300';
+        else if (item.rank === 2) rankBadgeClass = 'text-slate-800 bg-slate-200 font-black';
+        else if (item.rank === 3) rankBadgeClass = 'text-orange-800 bg-orange-100 font-black';
+        else if (item.rank <= 10) rankBadgeClass = 'text-pink-800 bg-pink-100 font-bold';
+
+        let votesContent = '<span class="text-gray-400 text-xs">-</span>';
+        if (item.votes) {
+          const percent = maxVotes > 0 ? ((item.votes / maxVotes) * 100).toFixed(1) : 0;
+          votesContent = `
+            <div class="flex flex-col items-end">
+              <span class="font-bold text-sanrio-deepPink font-mono text-sm">${item.votes.toLocaleString()}표</span>
+              <div class="w-28 md:w-36 bg-gray-100 rounded-full h-1.5 mt-1 overflow-hidden">
+                <div class="bg-gradient-to-r from-pink-300 to-sanrio-deepPink h-1.5 rounded-full" style="width: ${percent}%"></div>
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <tr class="hover:bg-pink-50/30 transition">
+            <td class="py-3 px-4 text-center">
+              <span class="inline-block w-8 py-0.5 rounded-full text-xs ${rankBadgeClass}">${item.rank}</span>
+            </td>
+            <td class="py-3 px-3 text-center">${diffBadge}</td>
+            <td class="py-3 px-4 text-center">
+              ${getCharacterImageHTML(item.name, 'w-9 h-9 mx-auto', 'text-xs')}
+            </td>
+            <td class="py-3 px-6 font-bold text-gray-800">
+              <span class="cursor-pointer hover:text-sanrio-deepPink transition inline-flex items-center gap-1.5" onclick="viewCharacterHistory('${item.name}')">
+                ${item.name}
+              </span>
+            </td>
+            <td class="py-3 px-6 text-right">${votesContent}</td>
+            <td class="py-3 px-6 text-center">
+              <button onclick="viewCharacterHistory('${item.name}')" class="px-2.5 py-1 text-xs rounded-lg bg-gray-100 hover:bg-sanrio-softPink hover:text-sanrio-deepPink transition font-medium border border-gray-200/60">
+                분석
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderTop10BarChart(top10List) {
+      const ctx = document.getElementById('top10BarChart').getContext('2d');
+      if (top10BarChartInstance) top10BarChartInstance.destroy();
+
+      top10BarChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: top10List.map(i => `${i.rank}위 ${i.name}`),
+          datasets: [{
+            label: '득표수',
+            data: top10List.map(i => i.votes || 0),
+            backgroundColor: [
+              'rgba(255, 101, 132, 0.85)', 'rgba(255, 183, 197, 0.85)', 'rgba(252, 227, 138, 0.85)',
+              'rgba(160, 231, 229, 0.85)', 'rgba(226, 212, 240, 0.85)', 'rgba(180, 215, 255, 0.85)',
+              'rgba(255, 205, 178, 0.85)', 'rgba(209, 238, 205, 0.85)', 'rgba(240, 210, 230, 0.85)',
+              'rgba(220, 225, 235, 0.85)'
+            ],
+            borderColor: '#FF6584',
+            borderWidth: 1,
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (c) => c.parsed.y ? c.parsed.y.toLocaleString() + '표' : '집계 중'
+              }
+            }
+          },
+          scales: {
+            y: {
+              ticks: { callback: (v) => (v / 10000).toLocaleString() + '만' },
+              grid: { color: '#f3f4f6' }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 11, weight: 'bold' } }
+            }
+          }
+        }
+      });
+    }
+
+    function viewCharacterHistory(name) {
+      document.getElementById('characterHistorySelect').value = name;
+      switchTab('history');
+    }
+
+    function renderHistoryView() {
+      const characterName = document.getElementById('characterHistorySelect').value;
+      if (!characterName) return;
+
+      document.getElementById('characterHeroAvatar').innerHTML = getCharacterImageHTML(characterName, 'w-14 h-14', 'text-xl');
+      document.getElementById('chartTitle').innerText = `${characterName} 역대 순위 변동 추이`;
+      document.getElementById('voteChartTitle').innerText = `${characterName} TOP 10 득표수 추이`;
+
+      const chronYears = [...years].sort((a, b) => parseInt(a) - parseInt(b));
+      const ranksData = [];
+      const votesData = [];
+      let totalRanks = 0, rankedCount = 0, bestRank = 999, top10Count = 0, lastRank = '-';
+
+      chronYears.forEach(yr => {
+        const list = rankingsByYear[yr] || [];
+        const entry = list.find(i => i.name === characterName);
+        if (entry) {
+          ranksData.push(entry.rank);
+          votesData.push(entry.votes || null);
+          totalRanks += entry.rank;
+          rankedCount++;
+          if (entry.rank < bestRank) bestRank = entry.rank;
+          if (entry.rank <= 10) top10Count++;
+          lastRank = `${entry.rank}위 (${yr}년)`;
+        } else {
+          ranksData.push(null);
+          votesData.push(null);
+        }
+      });
+
+      const avgRank = rankedCount > 0 ? (totalRanks / rankedCount).toFixed(1) : '-';
+      const bestRankStr = bestRank !== 999 ? `${bestRank}위` : '-';
+
+      document.getElementById('characterStatsRow').innerHTML = `
+        <div class="bg-white p-4 rounded-2xl border border-pink-100 shadow-sm text-center">
+          <div class="text-xs text-gray-500 font-bold mb-1">👑 역대 최고 순위</div>
+          <div class="text-2xl font-black text-sanrio-deepPink">${bestRankStr}</div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-pink-100 shadow-sm text-center">
+          <div class="text-xs text-gray-500 font-bold mb-1">⭐ 최근 순위</div>
+          <div class="text-2xl font-black text-gray-800">${lastRank}</div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-pink-100 shadow-sm text-center">
+          <div class="text-xs text-gray-500 font-bold mb-1">🏆 TOP 10 진입 횟수</div>
+          <div class="text-2xl font-black text-amber-500">${top10Count}회</div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-pink-100 shadow-sm text-center">
+          <div class="text-xs text-gray-500 font-bold mb-1">📈 통산 평균 순위</div>
+          <div class="text-2xl font-black text-gray-700">${avgRank}위</div>
+        </div>
+      `;
+
+      // Update Rank Chart (Inverted Y-axis)
+      const ctxRank = document.getElementById('rankHistoryChart').getContext('2d');
+      if (rankChartInstance) rankChartInstance.destroy();
+
+      rankChartInstance = new Chart(ctxRank, {
+        type: 'line',
+        data: {
+          labels: chronYears,
+          datasets: [{
+            label: `${characterName} 순위`,
+            data: ranksData,
+            borderColor: '#FF6584',
+            backgroundColor: 'rgba(255, 183, 197, 0.25)',
+            borderWidth: 3,
+            pointBackgroundColor: '#FF6584',
+            pointRadius: 5,
+            pointHoverRadius: 8,
+            tension: 0.2,
+            spanGaps: true,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              reverse: true,
+              min: 1,
+              ticks: { stepSize: 5, callback: (v) => v + '위' },
+              grid: { color: '#f3f4f6' }
+            },
+            x: { grid: { display: false } }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ctx.parsed.y ? `${characterName}: ${ctx.parsed.y}위` : '순위 밖'
+              }
+            }
+          }
+        }
+      });
+
+      // Update Votes Chart
+      const hasVotes = votesData.some(v => v !== null && v > 0);
+      const votesCard = document.getElementById('votesChartCard');
+      if (hasVotes) {
+        votesCard.classList.remove('hidden');
+        const ctxVotes = document.getElementById('votesHistoryChart').getContext('2d');
+        if (votesChartInstance) votesChartInstance.destroy();
+
+        votesChartInstance = new Chart(ctxVotes, {
+          type: 'bar',
+          data: {
+            labels: chronYears,
+            datasets: [{
+              label: `${characterName} 득표수`,
+              data: votesData,
+              backgroundColor: 'rgba(160, 231, 229, 0.85)',
+              borderColor: '#4ecdc4',
+              borderWidth: 1,
+              borderRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                ticks: { callback: (v) => v.toLocaleString() + '표' },
+                grid: { color: '#f3f4f6' }
+              },
+              x: { grid: { display: false } }
+            }
+          }
+        });
+      } else {
+        votesCard.classList.add('hidden');
+      }
+    }
+
+    function loadFallbackData() {
+      years = ['2020', '2021', '2022', '2023', '2024', '2025', '2026'];
+      rankingsByYear = {
+        '2026': [
+          { rank: 1, name: '폼폼푸린', votes: 7135114 },
+          { rank: 2, name: '시나모롤', votes: 6313623 },
+          { rank: 3, name: '포차코', votes: 3967689 },
+          { rank: 4, name: '쿠로미', votes: 3792049 },
+          { rank: 5, name: '헬로키티', votes: 3492847 },
+          { rank: 6, name: '아히루노페클', votes: 3030030 },
+          { rank: 7, name: '마이멜로디', votes: 2975439 },
+          { rank: 8, name: '턱시도샘', votes: 2565388 }
+        ]
+      };
+      characterSet = new Set(['폼폼푸린', '시나모롤', '포차코', '쿠로미', '헬로키티', '마이멜로디', '아히루노페클', '턱시도샘']);
+      populateYearSelector();
+      populateCharacterSelector();
+      renderRankingView();
+      renderHistoryView();
+    }
+  </script>
+</body>
+</html>
