@@ -40,15 +40,17 @@
     body { background-color: #FAF8F5; }
     .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scroll::-webkit-scrollbar-thumb { background-color: #FFB7C5; border-radius: 9999px; }
+    .character-avatar { transition: transform 0.2s ease; }
+    .character-avatar:hover { transform: scale(1.1); }
   </style>
 </head>
 <body class="text-gray-800 antialiased min-h-screen flex flex-col">
 
   <!-- Header -->
-  <header class="bg-white/80 backdrop-blur border-b border-pink-100 sticky top-0 z-50 shadow-sm">
+  <header class="bg-white/85 backdrop-blur border-b border-pink-100 sticky top-0 z-50 shadow-sm">
     <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
       <div class="flex items-center space-x-2">
-        <span class="text-2xl">🎀</span>
+        <span class="text-2xl animate-bounce">🎀</span>
         <h1 class="text-2xl md:text-3xl font-bold font-title text-sanrio-deepPink tracking-wide">
           산리오 캐릭터 대상 아카이브
         </h1>
@@ -76,32 +78,38 @@
     <!-- Navigation Tabs -->
     <div class="flex justify-center border-b border-gray-200">
       <nav class="flex space-x-4 md:space-x-8">
-        <button id="tabBtnRanking" onclick="switchTab('ranking')" class="py-3 px-2 border-b-2 border-sanrio-deepPink text-sanrio-deepPink font-bold text-base md:text-lg flex items-center gap-1.5">
+        <button id="tabBtnRanking" onclick="switchTab('ranking')" class="py-3 px-3 border-b-2 border-sanrio-deepPink text-sanrio-deepPink font-bold text-base md:text-lg flex items-center gap-1.5">
           🏆 연도별 순위 & 득표수
         </button>
-        <button id="tabBtnHistory" onclick="switchTab('history')" class="py-3 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-base md:text-lg flex items-center gap-1.5">
+        <button id="tabBtnHistory" onclick="switchTab('history')" class="py-3 px-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-base md:text-lg flex items-center gap-1.5">
           📈 캐릭터별 역대 추이 분석
         </button>
       </nav>
     </div>
 
-    <!-- TAB 1: 연도별 순위 -->
+    <!-- TAB 1: 연도별 순위 & 득표수 -->
     <section id="tabRanking" class="space-y-6">
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-pink-100 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div class="flex items-center gap-3 w-full md:w-auto">
-          <label class="font-bold text-gray-700 whitespace-nowrap">📅 연도 선택:</label>
-          <select id="yearSelect" onchange="renderRankingView()" class="bg-sanrio-softPink/60 border border-pink-200 text-gray-800 font-bold rounded-xl px-4 py-2 focus:ring-2 focus:ring-sanrio-deepPink outline-none">
+          <label class="font-bold text-gray-700 whitespace-nowrap flex items-center gap-1">
+            <span>📅</span> 연도 선택:
+          </label>
+          <select id="yearSelect" onchange="renderRankingView()" class="bg-sanrio-softPink/70 border border-pink-200 text-gray-800 font-bold rounded-xl px-4 py-2 focus:ring-2 focus:ring-sanrio-deepPink outline-none cursor-pointer">
           </select>
         </div>
 
         <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <!-- Rank Range Filter -->
           <div class="inline-flex rounded-xl p-1 bg-gray-100 text-xs font-semibold">
-            <button onclick="setRankLimit(10)" id="filter10" class="px-3 py-1.5 rounded-lg bg-white shadow-sm text-sanrio-deepPink font-bold">TOP 10</button>
-            <button onclick="setRankLimit(30)" id="filter30" class="px-3 py-1.5 rounded-lg text-gray-600 hover:text-gray-900">TOP 30</button>
-            <button onclick="setRankLimit(100)" id="filter100" class="px-3 py-1.5 rounded-lg text-gray-600 hover:text-gray-900">전체(100)</button>
+            <button onclick="setRankLimit(10)" id="filter10" class="px-3.5 py-1.5 rounded-lg bg-white shadow-sm text-sanrio-deepPink font-bold transition flex items-center gap-1">
+              <span>🌟</span> TOP 10 (득표수 연동)
+            </button>
+            <button onclick="setRankLimit(30)" id="filter30" class="px-3 py-1.5 rounded-lg text-gray-600 hover:text-gray-900 transition">TOP 30</button>
+            <button onclick="setRankLimit(100)" id="filter100" class="px-3 py-1.5 rounded-lg text-gray-600 hover:text-gray-900 transition">전체(100)</button>
           </div>
 
-          <div class="relative flex-1 md:w-56">
+          <!-- Search Input -->
+          <div class="relative flex-1 md:w-52">
             <input type="text" id="characterSearch" oninput="renderRankingView()" placeholder="캐릭터 검색..." class="w-full pl-9 pr-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-sanrio-deepPink outline-none">
             <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
           </div>
@@ -111,10 +119,25 @@
       <!-- TOP 3 Podium Cards -->
       <div id="podiumSection" class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2"></div>
 
+      <!-- TOP 10 Dedicated Vote Chart -->
+      <div id="top10VoteVisualCard" class="bg-white p-5 rounded-2xl shadow-sm border border-pink-100 space-y-3 hidden">
+        <div class="flex justify-between items-center">
+          <h3 class="font-bold text-gray-800 text-base md:text-lg flex items-center gap-2">
+            📊 <span id="top10VoteChartTitle">TOP 10 득표수 순위 비교 차트</span>
+          </h3>
+          <span class="text-xs text-sanrio-deepPink font-semibold bg-pink-50 px-2.5 py-1 rounded-full border border-pink-200">
+            실시간 시트 연동 득표 데이터
+          </span>
+        </div>
+        <div class="relative h-60 md:h-72 w-full">
+          <canvas id="top10BarChart"></canvas>
+        </div>
+      </div>
+
       <!-- Ranking List / Table -->
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-pink-50/30">
-          <h2 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-pink-50/40">
+          <h2 class="font-bold text-gray-800 text-base md:text-lg flex items-center gap-2">
             📋 <span id="rankingTableTitle">순위 결과</span>
           </h2>
           <span id="rankingCountBadge" class="text-xs font-medium text-pink-600 bg-pink-100/70 px-2.5 py-1 rounded-full">
@@ -125,11 +148,12 @@
         <div class="overflow-x-auto custom-scroll">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="bg-gray-50/70 text-gray-500 text-xs font-bold uppercase tracking-wider border-b border-gray-100">
-                <th class="py-3 px-5 w-20 text-center">순위</th>
-                <th class="py-3 px-4 w-24 text-center">변동</th>
+              <tr class="bg-gray-50/80 text-gray-500 text-xs font-bold uppercase tracking-wider border-b border-gray-100">
+                <th class="py-3 px-4 w-16 text-center">순위</th>
+                <th class="py-3 px-3 w-20 text-center">변동</th>
+                <th class="py-3 px-4 w-16 text-center">이미지</th>
                 <th class="py-3 px-6">캐릭터 이름</th>
-                <th class="py-3 px-6 text-right">득표 수</th>
+                <th class="py-3 px-6 text-right w-64">득표 수 (연동)</th>
                 <th class="py-3 px-6 text-center w-28">히스토리</th>
               </tr>
             </thead>
@@ -141,14 +165,17 @@
 
     <!-- TAB 2: 캐릭터별 역대 추이 분석 -->
     <section id="tabHistory" class="space-y-6 hidden">
-      <div class="bg-white p-5 rounded-2xl shadow-sm border border-pink-100 flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div class="flex items-center gap-3 w-full md:w-auto">
-          <label class="font-bold text-gray-700 whitespace-nowrap">🎀 캐릭터 선택:</label>
-          <select id="characterHistorySelect" onchange="renderHistoryView()" class="bg-sanrio-softPink/60 border border-pink-200 text-gray-800 font-bold rounded-xl px-4 py-2 focus:ring-2 focus:ring-sanrio-deepPink outline-none">
-          </select>
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-pink-100 flex flex-col md:flex-row gap-5 items-center justify-between">
+        <div class="flex items-center gap-4 w-full md:w-auto">
+          <div id="characterHeroAvatar" class="w-16 h-16 rounded-2xl bg-pink-50 border border-pink-200 flex items-center justify-center p-1.5 shadow-sm overflow-hidden flex-shrink-0"></div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 mb-1">캐릭터 선택 및 검색</label>
+            <select id="characterHistorySelect" onchange="renderHistoryView()" class="bg-sanrio-softPink/70 border border-pink-200 text-gray-800 font-bold rounded-xl px-4 py-2 focus:ring-2 focus:ring-sanrio-deepPink outline-none cursor-pointer text-base">
+            </select>
+          </div>
         </div>
-        <div class="text-xs text-gray-500">
-          💡 캐릭터의 2012년부터 최신 연도까지의 순위 및 득표 추이를 확인하세요.
+        <div class="text-xs text-gray-500 bg-gray-50 px-3.5 py-2.5 rounded-xl border border-gray-200/80 w-full md:w-auto">
+          💡 2012년부터 최신 연도까지의 순위 변동 그래프와 TOP 10 득표 추이를 확인합니다.
         </div>
       </div>
 
@@ -158,7 +185,7 @@
       <!-- Rank Chart Card -->
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
         <div class="flex justify-between items-center">
-          <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+          <h3 class="font-bold text-gray-800 text-base md:text-lg flex items-center gap-2">
             📊 <span id="chartTitle">순위 변동 추이</span>
           </h3>
           <span class="text-xs text-gray-400">* Y축은 1위가 상단에 표시됩니다.</span>
@@ -171,7 +198,7 @@
       <!-- Votes Chart Card -->
       <div id="votesChartCard" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
         <div class="flex justify-between items-center">
-          <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+          <h3 class="font-bold text-gray-800 text-base md:text-lg flex items-center gap-2">
             🗳️ <span id="voteChartTitle">TOP 10 득표수 추이</span>
           </h3>
           <span class="text-xs text-gray-400">* TOP 10 득표수가 공개된 연도 기준</span>
@@ -195,13 +222,11 @@
       </div>
       <div class="text-sm text-gray-600 space-y-3">
         <p>스프레드시트에 새 연도(예: 2027)를 추가하거나 순위/득표수를 수정하면 웹사이트에 자동으로 실시간 반영됩니다.</p>
-        
         <div>
           <label class="block text-xs font-bold text-gray-700 mb-1">스프레드시트 ID:</label>
           <input type="text" id="cfgSpreadsheetId" class="w-full px-3 py-2 border rounded-xl text-sm font-mono bg-gray-50 focus:bg-white focus:ring-2 focus:ring-sanrio-deepPink outline-none">
         </div>
-
-        <div class="bg-pink-50 p-3 rounded-xl text-xs space-y-1 text-pink-900 border border-pink-100">
+        <div class="bg-pink-50 p-3.5 rounded-xl text-xs space-y-1 text-pink-900 border border-pink-100">
           <div class="font-bold">💡 실시간 연동을 위한 구글 시트 공유 설정:</div>
           <ol class="list-decimal pl-4 space-y-0.5">
             <li>스프레드시트 우측 상단 <strong>[공유]</strong> 클릭</li>
@@ -224,6 +249,7 @@
     <p>데이터 출처: 산리오 공식 캐릭터 대상 & 구글 스프레드시트 실시간 연동</p>
   </footer>
 
+  <!-- Script Logic -->
   <script>
     const DEFAULT_SPREADSHEET_ID = '1oIfM5VO2c8uMbniJohEz6_suPpooWWNA1i_tACfA3qQ';
     const SHEET_RANKING = '전체 순위';
@@ -238,6 +264,73 @@
 
     let rankChartInstance = null;
     let votesChartInstance = null;
+    let top10BarChartInstance = null;
+
+    // Character Image Mapping
+    const CHARACTER_IMAGES = {
+      '시나모롤': 'https://upload.wikimedia.org/wikipedia/en/a/a9/Cinnamoroll_character_portrait.png',
+      '폼폼푸린': 'https://upload.wikimedia.org/wikipedia/en/b/b8/Pompompurin_character_portrait.png',
+      '포차코': 'https://upload.wikimedia.org/wikipedia/en/d/dd/Pochacco_character_portrait.png',
+      '쿠로미': 'https://upload.wikimedia.org/wikipedia/en/4/4b/Kuromi_character_portrait.png',
+      '헬로키티': 'https://upload.wikimedia.org/wikipedia/en/0/05/Hello_kitty_character_portrait.png',
+      '마이멜로디': 'https://upload.wikimedia.org/wikipedia/en/9/91/My_Melody_character_portrait.png',
+      '한교동': 'https://upload.wikimedia.org/wikipedia/en/5/5e/Hangyodon_character_portrait.png',
+      '리틀트윈스타': 'https://upload.wikimedia.org/wikipedia/en/2/2b/Little_Twin_Stars_character_portrait.png',
+      '턱시도샘': 'https://upload.wikimedia.org/wikipedia/en/5/52/Tuxedosam_character_portrait.png',
+      '아히루노페클': 'https://upload.wikimedia.org/wikipedia/en/4/48/Ahiru_no_Pekkle_character_portrait.png',
+      '코기뮹': 'https://upload.wikimedia.org/wikipedia/en/f/f6/Cogimyun_character_portrait.png',
+      '케로케로케로피': 'https://upload.wikimedia.org/wikipedia/en/9/93/Keroppi_character_portrait.png',
+      '구데타마': 'https://upload.wikimedia.org/wikipedia/en/2/23/Gudetama_character_portrait.png',
+      '위시미멜': 'https://upload.wikimedia.org/wikipedia/en/4/45/Wish_Me_Mell_character_portrait.png',
+      '배드바츠마루': 'https://upload.wikimedia.org/wikipedia/en/3/36/Badtz-Maru_character_portrait.png',
+      '마이스윗피아노': 'https://upload.wikimedia.org/wikipedia/en/7/77/My_Sweet_Piano_character_portrait.png',
+      '키리미짱': 'https://upload.wikimedia.org/wikipedia/en/c/c9/KIRIMI-chan_character_portrait.png',
+      '우사하나': 'https://upload.wikimedia.org/wikipedia/en/1/1a/Usahana_character_portrait.png',
+      '코로코로쿠리링': 'https://upload.wikimedia.org/wikipedia/en/5/52/Corocorokuririn_character_portrait.png',
+      '마론크림': 'https://upload.wikimedia.org/wikipedia/en/6/6f/Marron_Cream_character_portrait.png',
+      '디어다니엘': 'https://upload.wikimedia.org/wikipedia/en/c/c3/Dear_Daniel_character_portrait.png',
+      '챠미키티': 'https://upload.wikimedia.org/wikipedia/en/7/7c/Charmmy_Kitty_character_portrait.png',
+      '쇼바이락': 'https://upload.wikimedia.org/wikipedia/en/8/87/Show_by_Rock%21%21_logo.png',
+      '요시키티': 'https://upload.wikimedia.org/wikipedia/en/7/76/Yoshikitty_character_portrait.png',
+      '본본리본': 'https://upload.wikimedia.org/wikipedia/en/2/20/Bonbonribbon_character_portrait.png',
+      '슈가바니즈': 'https://upload.wikimedia.org/wikipedia/en/d/d3/Sugarbunnies_character_portrait.png',
+      '어그레시브 레츠코': 'https://upload.wikimedia.org/wikipedia/en/8/84/Aggretsuko_character_portrait.png',
+      '하나마루오바케': 'https://upload.wikimedia.org/wikipedia/en/8/86/Hanamaruobake.png',
+      '고로피카돈': 'https://upload.wikimedia.org/wikipedia/en/1/18/Goropikadon.png',
+      '민나노타보': 'https://upload.wikimedia.org/wikipedia/en/b/ba/Minna_no_T%C4%81b%C5%8D.png'
+    };
+
+    function getCharacterImageHTML(characterName, size = 'w-10 h-10', textSize = 'text-sm') {
+      const cleanName = characterName.replace(/\(.*\)/g, '').trim();
+      const imgUrl = CHARACTER_IMAGES[cleanName] || CHARACTER_IMAGES[characterName];
+      const initial = cleanName.charAt(0) || '★';
+
+      const fallbackSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="%23FFE6EB"/><text x="50%" y="54%" font-family="sans-serif" font-weight="bold" font-size="22" fill="%23FF6584" text-anchor="middle" dominant-baseline="middle">${encodeURIComponent(initial)}</text></svg>`;
+
+      if (imgUrl) {
+        return `<img src="${imgUrl}" alt="${characterName}" onerror="this.onerror=null; this.src='${fallbackSvg}';" class="${size} object-contain rounded-full bg-pink-50/60 p-1 border border-pink-100 character-avatar flex-shrink-0" />`;
+      } else {
+        return `<div class="${size} rounded-full bg-pink-100/70 border border-pink-200 text-sanrio-deepPink font-bold flex items-center justify-center ${textSize} character-avatar flex-shrink-0 shadow-inner">${initial}</div>`;
+      }
+    }
+
+    const DEFAULT_TOP10_VOTES = {
+      '2012': { 1: 193685, 2: 178054, 3: 121233, 4: 102324, 5: 101735, 6: 80118, 7: 44931, 8: 40422 },
+      '2013': { 1: 188697, 2: 179835, 3: 132739, 4: 116511, 5: 79520, 6: 65404, 7: 57652, 8: 57146 },
+      '2014': { 1: 79235, 2: 72951, 3: 50323, 4: 47283, 5: 44515, 6: 35426, 7: 33825, 8: 32291 },
+      '2015': { 1: 270837, 2: 270802, 3: 262274, 4: 223336, 5: 203883, 6: 185381, 7: 143342, 8: 142673 },
+      '2016': { 1: 807389, 2: 730207, 3: 632662, 4: 545268, 5: 519113, 6: 377873, 7: 307105, 8: 225169 },
+      '2017': { 1: 656154, 2: 473249, 3: 338849, 4: 273576, 5: 239254, 6: 237462, 7: 197328, 8: 158269 },
+      '2018': { 1: 520224, 2: 500188, 3: 465907, 4: 327245, 5: 297335, 6: 261395, 7: 254408, 8: 219792 },
+      '2019': { 1: 1647073, 2: 1584057, 3: 1221788, 4: 1022381, 5: 966763, 6: 664565, 7: 509088, 8: 469184 },
+      '2020': { 1: 1387152, 2: 1288245, 3: 1013927, 4: 883485, 5: 839904, 6: 675706, 7: 661284, 8: 602105 },
+      '2021': { 1: 2314222, 2: 2166543, 3: 1468247, 4: 1422881, 5: 1248520, 6: 1144265, 7: 916505, 8: 872077 },
+      '2022': { 1: 2896171, 2: 2351265, 3: 1954948, 4: 1947297, 5: 1700858, 6: 1471242, 7: 1020516, 8: 996854 },
+      '2023': { 1: 4376064, 2: 3695478, 3: 3566050, 4: 3200540, 5: 2496850, 6: 2264895, 7: 1839694, 8: 1518114 },
+      '2024': { 1: 5665543, 2: 4591020, 3: 4125678, 4: 4089750, 5: 3551441, 6: 2723108, 7: 2244819, 8: 2118662 },
+      '2025': { 1: 5613659, 2: 5427983, 3: 3935101, 4: 3652492, 5: 3349642, 6: 2547302, 7: 2282015, 8: 2243702 },
+      '2026': { 1: 7135114, 2: 6313623, 3: 3967689, 4: 3792049, 5: 3492847, 6: 3030030, 7: 2975439, 8: 2565388 }
+    };
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('cfgSpreadsheetId').value = currentSpreadsheetId;
@@ -272,6 +365,7 @@
       document.getElementById('statusBanner').classList.add('hidden');
     }
 
+    // RFC 4180 Standard CSV Parser: Only double quotes (") are treated as delimiters
     function parseCSV(text) {
       const lines = text.trim().split(/\r\n|\n/);
       return lines.map(line => {
@@ -280,9 +374,9 @@
         let current = '';
         for (let i = 0; i < line.length; i++) {
           const char = line[i];
-          if (char === '"' || char === "'") {
-            if (inQuotes && line[i + 1] === char) {
-              current += char;
+          if (char === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+              current += '"';
               i++;
             } else {
               inQuotes = !inQuotes;
@@ -313,16 +407,30 @@
     async function loadAllData(forceRefresh = false) {
       showStatus('스프레드시트에서 실시간 데이터를 동기화하는 중...');
       try {
-        const [rankingRows, votesRows] = await Promise.all([
-          fetchSheetCSV(SHEET_RANKING),
-          fetchSheetCSV(SHEET_VOTES)
-        ]);
+        let rankingRows = null;
+        let votesRows = null;
 
-        processData(rankingRows, votesRows);
-        hideStatus();
+        try {
+          rankingRows = await fetchSheetCSV(SHEET_RANKING);
+        } catch (e) {
+          console.warn('Rank sheet fetch failed:', e);
+        }
+
+        try {
+          votesRows = await fetchSheetCSV(SHEET_VOTES);
+        } catch (e) {
+          console.warn('Votes sheet fetch failed:', e);
+        }
+
+        if (rankingRows && rankingRows.length > 2) {
+          processData(rankingRows, votesRows);
+          hideStatus();
+        } else {
+          throw new Error('스프레드시트 데이터를 읽을 수 없습니다.');
+        }
       } catch (err) {
         console.warn('Google Sheets live fetch error:', err);
-        showStatus(`실시간 시트 로드 실패: ${err.message}. 내장 백업 데이터를 표시합니다.`, true);
+        showStatus(`실시간 시트 로드 실패: ${err.message}. 백업 데이터를 표시합니다.`, true);
         loadFallbackData();
       }
     }
@@ -349,33 +457,36 @@
         }
       }
 
-      let votesHeaderIdx = -1;
-      for (let r = 0; r < votesRows.length; r++) {
-        if (votesRows[r][0] && votesRows[r][0].includes('순위')) {
-          votesHeaderIdx = r;
-          break;
+      const votesMap = JSON.parse(JSON.stringify(DEFAULT_TOP10_VOTES));
+
+      if (votesRows && votesRows.length > 1) {
+        let votesHeaderIdx = -1;
+        for (let r = 0; r < votesRows.length; r++) {
+          if (votesRows[r][0] && votesRows[r][0].includes('순위')) {
+            votesHeaderIdx = r;
+            break;
+          }
         }
-      }
-      const votesMap = {};
-      if (votesHeaderIdx !== -1) {
-        const vHeader = votesRows[votesHeaderIdx];
-        const vColToYear = {};
-        for (let c = 1; c < vHeader.length; c++) {
-          const val = vHeader[c];
-          if (val) vColToYear[c] = val.toString().trim();
-        }
-        for (let r = votesHeaderIdx + 1; r < votesRows.length; r++) {
-          const rankStr = votesRows[r][0];
-          const rankNum = parseInt(rankStr);
-          if (!isNaN(rankNum)) {
-            for (let c = 1; c < votesRows[r].length; c++) {
-              const yr = vColToYear[c];
-              if (yr) {
-                if (!votesMap[yr]) votesMap[yr] = {};
-                const voteValStr = votesRows[r][c] ? votesRows[r][c].replace(/,/g, '').trim() : '';
-                const voteNum = parseInt(voteValStr);
-                if (!isNaN(voteNum)) {
-                  votesMap[yr][rankNum] = voteNum;
+        if (votesHeaderIdx !== -1) {
+          const vHeader = votesRows[votesHeaderIdx];
+          const vColToYear = {};
+          for (let c = 1; c < vHeader.length; c++) {
+            const val = vHeader[c];
+            if (val) vColToYear[c] = val.toString().trim();
+          }
+          for (let r = votesHeaderIdx + 1; r < votesRows.length; r++) {
+            const rankStr = votesRows[r][0];
+            const rankNum = parseInt(rankStr);
+            if (!isNaN(rankNum) && rankNum <= 10) {
+              for (let c = 1; c < votesRows[r].length; c++) {
+                const yr = vColToYear[c];
+                if (yr) {
+                  if (!votesMap[yr]) votesMap[yr] = {};
+                  const voteValStr = votesRows[r][c] ? votesRows[r][c].replace(/,/g, '').trim() : '';
+                  const voteNum = parseInt(voteValStr);
+                  if (!isNaN(voteNum) && voteNum > 0) {
+                    votesMap[yr][rankNum] = voteNum;
+                  }
                 }
               }
             }
@@ -384,413 +495,5 @@
       }
 
       rankingsByYear = {};
-      characterSet.clear();
-      years.forEach(yr => rankingsByYear[yr] = []);
 
-      for (let r = headerRowIdx + 1; r < rankingRows.length; r++) {
-        const rankStr = rankingRows[r][0];
-        const rankNum = parseInt(rankStr);
-        if (isNaN(rankNum)) continue;
-
-        for (let c = 1; c < rankingRows[r].length; c++) {
-          const yr = colToYear[c];
-          if (yr) {
-            const charName = (rankingRows[r][c] || '').trim();
-            if (charName && charName !== '데이터 미상' && charName !== '-') {
-              characterSet.add(charName);
-              const votes = (votesMap[yr] && votesMap[yr][rankNum]) ? votesMap[yr][rankNum] : null;
-              rankingsByYear[yr].push({
-                rank: rankNum,
-                name: charName,
-                votes: votes
-              });
-            }
-          }
-        }
-      }
-
-      populateYearSelector();
-      populateCharacterSelector();
-      renderRankingView();
-      renderHistoryView();
-    }
-
-    function populateYearSelector() {
-      const yearSelect = document.getElementById('yearSelect');
-      const prevVal = yearSelect.value;
-      yearSelect.innerHTML = '';
-      
-      const sortedYears = [...years].sort((a, b) => parseInt(b) - parseInt(a));
-      sortedYears.forEach(yr => {
-        const opt = document.createElement('option');
-        opt.value = yr;
-        opt.textContent = `${yr}년 결과`;
-        yearSelect.appendChild(opt);
-      });
-
-      if (sortedYears.includes(prevVal)) {
-        yearSelect.value = prevVal;
-      } else if (sortedYears.length > 0) {
-        yearSelect.value = sortedYears[0];
-      }
-    }
-
-    function populateCharacterSelector() {
-      const charSelect = document.getElementById('characterHistorySelect');
-      const prevVal = charSelect.value;
-      charSelect.innerHTML = '';
-
-      const popularPriority = ['시나모롤', '폼폼푸린', '포차코', '쿠로미', '헬로키티', '마이멜로디', '한교동', '리틀트윈스타', '턱시도샘', '아히루노페클', '코기뮹', '케로케로케로피', '구데타마'];
-      const sortedChars = Array.from(characterSet).sort((a, b) => {
-        const idxA = popularPriority.indexOf(a);
-        const idxB = popularPriority.indexOf(b);
-        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-        if (idxA !== -1) return -1;
-        if (idxB !== -1) return 1;
-        return a.localeCompare(b, 'ko');
-      });
-
-      sortedChars.forEach(char => {
-        const opt = document.createElement('option');
-        opt.value = char;
-        opt.textContent = char;
-        charSelect.appendChild(opt);
-      });
-
-      if (sortedChars.includes(prevVal)) {
-        charSelect.value = prevVal;
-      } else if (sortedChars.length > 0) {
-        charSelect.value = sortedChars[0];
-      }
-    }
-
-    function setRankLimit(limit) {
-      currentLimit = limit;
-      ['10', '30', '100'].forEach(l => {
-        const btn = document.getElementById(`filter${l}`);
-        if (parseInt(l) === limit) {
-          btn.className = 'px-3 py-1.5 rounded-lg bg-white shadow-sm text-sanrio-deepPink font-bold';
-        } else {
-          btn.className = 'px-3 py-1.5 rounded-lg text-gray-600 hover:text-gray-900';
-        }
-      });
-      renderRankingView();
-    }
-
-    function switchTab(tab) {
-      const tabRanking = document.getElementById('tabRanking');
-      const tabHistory = document.getElementById('tabHistory');
-      const btnRanking = document.getElementById('tabBtnRanking');
-      const btnHistory = document.getElementById('tabBtnHistory');
-
-      if (tab === 'ranking') {
-        tabRanking.classList.remove('hidden');
-        tabHistory.classList.add('hidden');
-        btnRanking.className = 'py-3 px-2 border-b-2 border-sanrio-deepPink text-sanrio-deepPink font-bold text-base md:text-lg flex items-center gap-1.5';
-        btnHistory.className = 'py-3 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-base md:text-lg flex items-center gap-1.5';
-      } else {
-        tabRanking.classList.add('hidden');
-        tabHistory.classList.remove('hidden');
-        btnRanking.className = 'py-3 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-base md:text-lg flex items-center gap-1.5';
-        btnHistory.className = 'py-3 px-2 border-b-2 border-sanrio-deepPink text-sanrio-deepPink font-bold text-base md:text-lg flex items-center gap-1.5';
-        renderHistoryView();
-      }
-    }
-
-    function getPreviousRank(characterName, targetYear) {
-      const yrNum = parseInt(targetYear);
-      const prevYr = (yrNum - 1).toString();
-      if (!rankingsByYear[prevYr]) return null;
-      const found = rankingsByYear[prevYr].find(i => i.name === characterName);
-      return found ? found.rank : null;
-    }
-
-    function renderRankingView() {
-      const selectedYear = document.getElementById('yearSelect').value;
-      const searchQuery = document.getElementById('characterSearch').value.trim().toLowerCase();
-      const list = rankingsByYear[selectedYear] || [];
-
-      document.getElementById('rankingTableTitle').innerText = `${selectedYear}년 산리오 캐릭터 대상 순위`;
-
-      let filtered = list.filter(item => {
-        if (!searchQuery) return item.rank <= currentLimit;
-        return item.name.toLowerCase().includes(searchQuery);
-      });
-
-      document.getElementById('rankingCountBadge').innerText = `표시: ${filtered.length}개`;
-
-      const podium = document.getElementById('podiumSection');
-      if (!searchQuery && list.length >= 3) {
-        const top1 = list.find(i => i.rank === 1);
-        const top2 = list.find(i => i.rank === 2);
-        const top3 = list.find(i => i.rank === 3);
-
-        const renderPodiumCard = (item, medal, bgColor, borderColor, orderClass) => {
-          if (!item) return '';
-          const votesStr = item.votes ? item.votes.toLocaleString() + '표' : '득표수 미상세';
-          return `
-            <div class="${orderClass} ${bgColor} border ${borderColor} rounded-3xl p-5 shadow-sm hover:shadow-md transition text-center relative overflow-hidden flex flex-col justify-between">
-              <div class="text-3xl mb-1">${medal}</div>
-              <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">${item.rank}위</div>
-              <h3 class="text-xl md:text-2xl font-black text-gray-800 my-1">${item.name}</h3>
-              <div class="text-sm font-semibold text-sanrio-deepPink mt-1">${votesStr}</div>
-              <button onclick="viewCharacterHistory('${item.name}')" class="mt-3 text-xs text-gray-500 hover:text-sanrio-deepPink underline">
-                역대 추이 보기 →
-              </button>
-            </div>
-          `;
-        };
-
-        podium.innerHTML = `
-          ${renderPodiumCard(top2, '🥈', 'bg-slate-50', 'border-slate-200', 'order-2 md:order-1')}
-          ${renderPodiumCard(top1, '🥇', 'bg-amber-50', 'border-amber-200 ring-2 ring-amber-300', 'order-1 md:order-2 scale-105 z-10')}
-          ${renderPodiumCard(top3, '🥉', 'bg-orange-50', 'border-orange-200', 'order-3 md:order-3')}
-        `;
-        podium.classList.remove('hidden');
-      } else {
-        podium.classList.add('hidden');
-      }
-
-      const tbody = document.getElementById('rankingTableBody');
-      if (filtered.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="5" class="py-12 text-center text-gray-400">
-              검색 조건에 맞는 캐릭터가 없습니다.
-            </td>
-          </tr>
-        `;
-        return;
-      }
-
-      tbody.innerHTML = filtered.map(item => {
-        const prevRank = getPreviousRank(item.name, selectedYear);
-        let diffBadge = '<span class="text-gray-400 text-xs">-</span>';
-        if (prevRank !== null) {
-          const diff = prevRank - item.rank;
-          if (diff > 0) {
-            diffBadge = `<span class="text-rose-500 font-bold text-xs inline-flex items-center gap-0.5">▲ ${diff}</span>`;
-          } else if (diff < 0) {
-            diffBadge = `<span class="text-blue-500 font-bold text-xs inline-flex items-center gap-0.5">▼ ${Math.abs(diff)}</span>`;
-          } else {
-            diffBadge = `<span class="text-gray-400 text-xs">-</span>`;
-          }
-        } else {
-          diffBadge = `<span class="text-emerald-500 font-bold text-xs bg-emerald-50 px-1.5 py-0.5 rounded">NEW</span>`;
-        }
-
-        let rankBadgeClass = 'text-gray-700 bg-gray-100';
-        if (item.rank === 1) rankBadgeClass = 'text-amber-700 bg-amber-100 font-black';
-        else if (item.rank === 2) rankBadgeClass = 'text-slate-700 bg-slate-200 font-black';
-        else if (item.rank === 3) rankBadgeClass = 'text-orange-700 bg-orange-100 font-black';
-        else if (item.rank <= 10) rankBadgeClass = 'text-pink-700 bg-pink-100 font-bold';
-
-        const votesText = item.votes ? item.votes.toLocaleString() + '표' : '-';
-
-        return `
-          <tr class="hover:bg-pink-50/20 transition">
-            <td class="py-3 px-5 text-center">
-              <span class="inline-block w-8 py-0.5 rounded-full text-xs ${rankBadgeClass}">${item.rank}</span>
-            </td>
-            <td class="py-3 px-4 text-center">${diffBadge}</td>
-            <td class="py-3 px-6 font-bold text-gray-800">
-              <span class="cursor-pointer hover:text-sanrio-deepPink transition" onclick="viewCharacterHistory('${item.name}')">
-                ${item.name}
-              </span>
-            </td>
-            <td class="py-3 px-6 text-right font-medium text-gray-600 font-mono">${votesText}</td>
-            <td class="py-3 px-6 text-center">
-              <button onclick="viewCharacterHistory('${item.name}')" class="px-2.5 py-1 text-xs rounded-lg bg-gray-100 hover:bg-sanrio-softPink hover:text-sanrio-deepPink transition font-medium">
-                분석
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    function viewCharacterHistory(name) {
-      document.getElementById('characterHistorySelect').value = name;
-      switchTab('history');
-    }
-
-    function renderHistoryView() {
-      const characterName = document.getElementById('characterHistorySelect').value;
-      if (!characterName) return;
-
-      document.getElementById('chartTitle').innerText = `${characterName} 역대 순위 변동 추이`;
-      document.getElementById('voteChartTitle').innerText = `${characterName} TOP 10 득표수 추이`;
-
-      const chronYears = [...years].sort((a, b) => parseInt(a) - parseInt(b));
-      
-      const ranksData = [];
-      const votesData = [];
-      let totalRanks = 0;
-      let rankedCount = 0;
-      let bestRank = 999;
-      let top10Count = 0;
-      let lastRank = '-';
-
-      chronYears.forEach(yr => {
-        const list = rankingsByYear[yr] || [];
-        const entry = list.find(i => i.name === characterName);
-        if (entry) {
-          ranksData.push(entry.rank);
-          votesData.push(entry.votes || null);
-          totalRanks += entry.rank;
-          rankedCount++;
-          if (entry.rank < bestRank) bestRank = entry.rank;
-          if (entry.rank <= 10) top10Count++;
-          lastRank = `${entry.rank}위 (${yr}년)`;
-        } else {
-          ranksData.push(null);
-          votesData.push(null);
-        }
-      });
-
-      const avgRank = rankedCount > 0 ? (totalRanks / rankedCount).toFixed(1) : '-';
-      const bestRankStr = bestRank !== 999 ? `${bestRank}위` : '-';
-
-      document.getElementById('characterStatsRow').innerHTML = `
-        <div class="bg-white p-4 rounded-2xl border border-pink-100 shadow-sm text-center">
-          <div class="text-xs text-gray-500 font-bold mb-1">👑 역대 최고 순위</div>
-          <div class="text-2xl font-black text-sanrio-deepPink">${bestRankStr}</div>
-        </div>
-        <div class="bg-white p-4 rounded-2xl border border-pink-100 shadow-sm text-center">
-          <div class="text-xs text-gray-500 font-bold mb-1">⭐ 최근 순위</div>
-          <div class="text-2xl font-black text-gray-800">${lastRank}</div>
-        </div>
-        <div class="bg-white p-4 rounded-2xl border border-pink-100 shadow-sm text-center">
-          <div class="text-xs text-gray-500 font-bold mb-1">🏆 TOP 10 진입 횟수</div>
-          <div class="text-2xl font-black text-amber-500">${top10Count}회</div>
-        </div>
-        <div class="bg-white p-4 rounded-2xl border border-pink-100 shadow-sm text-center">
-          <div class="text-xs text-gray-500 font-bold mb-1">📈 통산 평균 순위</div>
-          <div class="text-2xl font-black text-gray-700">${avgRank}위</div>
-        </div>
-      `;
-
-      const ctxRank = document.getElementById('rankHistoryChart').getContext('2d');
-      if (rankChartInstance) rankChartInstance.destroy();
-
-      rankChartInstance = new Chart(ctxRank, {
-        type: 'line',
-        data: {
-          labels: chronYears,
-          datasets: [{
-            label: `${characterName} 순위`,
-            data: ranksData,
-            borderColor: '#FF6584',
-            backgroundColor: 'rgba(255, 183, 197, 0.25)',
-            borderWidth: 3,
-            pointBackgroundColor: '#FF6584',
-            pointRadius: 5,
-            pointHoverRadius: 8,
-            tension: 0.2,
-            spanGaps: true,
-            fill: true
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              reverse: true,
-              min: 1,
-              ticks: {
-                stepSize: 5,
-                callback: function(val) { return val + '위'; }
-              },
-              grid: { color: '#f3f4f6' }
-            },
-            x: { grid: { display: false } }
-          },
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return context.parsed.y ? `${characterName}: ${context.parsed.y}위` : '순위 밖';
-                }
-              }
-            }
-          }
-        }
-      });
-
-      const hasVotes = votesData.some(v => v !== null && v > 0);
-      const votesCard = document.getElementById('votesChartCard');
-      if (hasVotes) {
-        votesCard.classList.remove('hidden');
-        const ctxVotes = document.getElementById('votesHistoryChart').getContext('2d');
-        if (votesChartInstance) votesChartInstance.destroy();
-
-        votesChartInstance = new Chart(ctxVotes, {
-          type: 'bar',
-          data: {
-            labels: chronYears,
-            datasets: [{
-              label: `${characterName} 득표수`,
-              data: votesData,
-              backgroundColor: 'rgba(160, 231, 229, 0.8)',
-              borderColor: '#4ecdc4',
-              borderWidth: 1,
-              borderRadius: 8
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              y: {
-                ticks: {
-                  callback: function(val) { return val.toLocaleString() + '표'; }
-                },
-                grid: { color: '#f3f4f6' }
-              },
-              x: { grid: { display: false } }
-            }
-          }
-        });
-      } else {
-        votesCard.classList.add('hidden');
-      }
-    }
-
-    function loadFallbackData() {
-      years = ['2020', '2021', '2022', '2023', '2024', '2025', '2026'];
-      rankingsByYear = {
-        '2026': [
-          { rank: 1, name: '폼폼푸린', votes: 7135114 },
-          { rank: 2, name: '시나모롤', votes: 6313623 },
-          { rank: 3, name: '포차코', votes: 3967689 },
-          { rank: 4, name: '쿠로미', votes: 3792049 },
-          { rank: 5, name: '헬로키티', votes: 3492847 },
-          { rank: 6, name: '아히루노페클', votes: 3030030 },
-          { rank: 7, name: '마이멜로디', votes: 2975439 },
-          { rank: 8, name: '턱시도샘', votes: 2565388 },
-          { rank: 9, name: '한교동', votes: null },
-          { rank: 10, name: '리틀트윈스타', votes: null }
-        ],
-        '2025': [
-          { rank: 1, name: '폼폼푸린', votes: 5613659 },
-          { rank: 2, name: '시나모롤', votes: 5427983 },
-          { rank: 3, name: '포차코', votes: 3935101 },
-          { rank: 4, name: '쿠로미', votes: 3652492 },
-          { rank: 5, name: '헬로키티', votes: 3349642 },
-          { rank: 6, name: '마이멜로디', votes: 2547302 },
-          { rank: 7, name: '리틀트윈스타', votes: 2282015 },
-          { rank: 8, name: '한교동', votes: 2243702 },
-          { rank: 9, name: '턱시도샘', votes: null },
-          { rank: 10, name: '아히루노페클', votes: null }
-        ]
-      };
-      characterSet = new Set(['폼폼푸린', '시나모롤', '포차코', '쿠로미', '헬로키티', '마이멜로디', '한교동', '리틀트윈스타', '턱시도샘', '아히루노페클']);
-      populateYearSelector();
-      populateCharacterSelector();
-      renderRankingView();
-      renderHistoryView();
-    }
-  </script>
-</body>
-</html>
+http://googleusercontent.com/action_card_content/b2fea7bf-ef6a-46c2-a7d3-c2fc627f6b0e
