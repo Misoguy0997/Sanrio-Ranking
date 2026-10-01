@@ -33,7 +33,7 @@
     .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scroll::-webkit-scrollbar-thumb { background-color: #FFB7C5; border-radius: 9999px; }
     .char-avatar { transition: transform 0.2s ease; }
-    .char-avatar:hover { transform: scale(1.1); }
+    .char-avatar:hover { transform: scale(1.08); }
   </style>
 </head>
 <body class="text-gray-800 antialiased min-h-screen flex flex-col">
@@ -139,8 +139,8 @@
               <tr class="bg-gray-50/80 text-gray-500 text-xs font-bold uppercase tracking-wider border-b border-gray-100">
                 <th class="py-3 px-4 w-16 text-center">순위</th>
                 <th class="py-3 px-3 w-20 text-center">변동</th>
-                <th class="py-3 px-4 w-16 text-center">이미지</th>
-                <th class="py-3 px-6">캐릭터 이름</th>
+                <th class="py-3 px-4 w-20 text-center">심볼</th>
+                <th class="py-3 px-6">캐릭터 및 공식 이미지</th>
                 <th class="py-3 px-6 text-right w-64">득표 수 (연동)</th>
                 <th class="py-3 px-6 text-center w-28">히스토리</th>
               </tr>
@@ -160,6 +160,7 @@
             <label class="block text-xs font-bold text-gray-500 mb-1">캐릭터 선택 및 검색</label>
             <select id="characterHistorySelect" onchange="renderHistoryView()" class="bg-sanrio-softPink/70 border border-pink-200 text-gray-800 font-bold rounded-xl px-4 py-2 focus:ring-2 focus:ring-sanrio-deepPink outline-none cursor-pointer text-base">
             </select>
+            <div id="characterOfficialLinkContainer" class="mt-1"></div>
           </div>
         </div>
         <div class="text-xs text-gray-500 bg-gray-50 px-3.5 py-2.5 rounded-xl border border-gray-200/80 w-full md:w-auto">
@@ -228,9 +229,20 @@
     </div>
   </div>
 
-  <footer class="bg-white border-t border-gray-100 py-6 mt-12 text-center text-xs text-gray-400 space-y-1">
-    <p>Sanrio Character Ranking Interactive Archive</p>
-    <p>데이터 출처: 산리오 공식 캐릭터 대상 & 구글 스프레드시트 실시간 연동</p>
+  <!-- Copyright & Safe Usage Footer -->
+  <footer class="bg-white border-t border-gray-100 py-8 mt-12 text-center text-xs text-gray-500 space-y-2">
+    <div class="max-w-4xl mx-auto px-4 space-y-1.5">
+      <p class="font-bold text-gray-600">Sanrio Character Ranking Interactive Archive</p>
+      <p>데이터 출처: 산리오 공식 캐릭터 대상 & 구글 스프레드시트 실시간 연동</p>
+      <div class="p-4 bg-pink-50/60 rounded-2xl border border-pink-100 text-[11px] text-gray-600 leading-relaxed max-w-2xl mx-auto mt-3">
+        <p class="font-bold text-gray-800 text-xs">⚖️ 저작권 보호 및 안전 이용 고지</p>
+        <p class="mt-1.5">
+          본 웹 대시보드는 저작권법을 엄격히 준수하기 위해 <strong>외부 캐릭터 이미지 파일을 일체 저장·전송·링크하지 않습니다.</strong><br>
+          대시보드 내에서는 각 캐릭터 고유의 시그니처 컬러 및 상징 심볼(이모지) 디자인으로 안전하게 표현되며, 원본 이미지는 <strong>산리오 공식 웹사이트 링크(↗)</strong>를 통해 직접 확인하실 수 있습니다.<br>
+          모든 캐릭터의 저작권 및 상표권은 <strong>주식회사 산리오(© 1976, 2026 SANRIO CO., LTD.)</strong>에 전적으로 귀속됩니다.
+        </p>
+      </div>
+    </div>
   </footer>
 
   <!-- Script Logic -->
@@ -249,63 +261,93 @@
     let votesChartInstance = null;
     let top10BarChartInstance = null;
 
-    const CHARACTER_IMAGES = {
-      '시나모롤': 'https://upload.wikimedia.org/wikipedia/en/a/a9/Cinnamoroll_character_portrait.png',
-      '폼폼푸린': 'https://upload.wikimedia.org/wikipedia/en/b/b8/Pompompurin_character_portrait.png',
-      '포차코': 'https://upload.wikimedia.org/wikipedia/en/d/dd/Pochacco_character_portrait.png',
-      '쿠로미': 'https://upload.wikimedia.org/wikipedia/en/4/4b/Kuromi_character_portrait.png',
-      '헬로키티': 'https://upload.wikimedia.org/wikipedia/en/0/05/Hello_kitty_character_portrait.png',
-      '마이멜로디': 'https://upload.wikimedia.org/wikipedia/en/9/91/My_Melody_character_portrait.png',
-      '한교동': 'https://upload.wikimedia.org/wikipedia/en/5/5e/Hangyodon_character_portrait.png',
-      '리틀트윈스타': 'https://upload.wikimedia.org/wikipedia/en/2/2b/Little_Twin_Stars_character_portrait.png',
-      '턱시도샘': 'https://upload.wikimedia.org/wikipedia/en/5/52/Tuxedosam_character_portrait.png',
-      '아히루노페클': 'https://upload.wikimedia.org/wikipedia/en/4/48/Ahiru_no_Pekkle_character_portrait.png',
-      '코기뮹': 'https://upload.wikimedia.org/wikipedia/en/f/f6/Cogimyun_character_portrait.png',
-      '케로케로케로피': 'https://upload.wikimedia.org/wikipedia/en/9/93/Keroppi_character_portrait.png',
-      '구데타마': 'https://upload.wikimedia.org/wikipedia/en/2/23/Gudetama_character_portrait.png',
-      '위시미멜': 'https://upload.wikimedia.org/wikipedia/en/4/45/Wish_Me_Mell_character_portrait.png',
-      '배드바츠마루': 'https://upload.wikimedia.org/wikipedia/en/3/36/Badtz-Maru_character_portrait.png',
-      '마이스윗피아노': 'https://upload.wikimedia.org/wikipedia/en/7/77/My_Sweet_Piano_character_portrait.png',
-      '키리미짱': 'https://upload.wikimedia.org/wikipedia/en/c/c9/KIRIMI-chan_character_portrait.png',
-      '우사하나': 'https://upload.wikimedia.org/wikipedia/en/1/1a/Usahana_character_portrait.png',
-      '코로코로쿠리링': 'https://upload.wikimedia.org/wikipedia/en/5/52/Corocorokuririn_character_portrait.png',
-      '마론크림': 'https://upload.wikimedia.org/wikipedia/en/6/6f/Marron_Cream_character_portrait.png',
-      '디어다니엘': 'https://upload.wikimedia.org/wikipedia/en/c/c3/Dear_Daniel_character_portrait.png',
-      '챠미키티': 'https://upload.wikimedia.org/wikipedia/en/7/7c/Charmmy_Kitty_character_portrait.png',
-      '요시키티': 'https://upload.wikimedia.org/wikipedia/en/7/76/Yoshikitty_character_portrait.png',
-      '본본리본': 'https://upload.wikimedia.org/wikipedia/en/2/20/Bonbonribbon_character_portrait.png',
-      '슈가바니즈': 'https://upload.wikimedia.org/wikipedia/en/d/d3/Sugarbunnies_character_portrait.png',
-      '어그레시브 레츠코': 'https://upload.wikimedia.org/wikipedia/en/8/84/Aggretsuko_character_portrait.png',
-      '하나마루오바케': 'https://upload.wikimedia.org/wikipedia/en/8/86/Hanamaruobake.png'
+    // 공식 산리오 캐릭터 사이트 링크 매핑
+    const SANRIO_OFFICIAL_URLS = {
+      '시나모롤': 'https://www.sanrio.co.jp/character/cinnamon/',
+      '폼폼푸린': 'https://www.sanrio.co.jp/character/pompompurin/',
+      '포차코': 'https://www.sanrio.co.jp/character/pochacco/',
+      '쿠로미': 'https://www.sanrio.co.jp/character/kuromi/',
+      '헬로키티': 'https://www.sanrio.co.jp/character/hellokitty/',
+      '마이멜로디': 'https://www.sanrio.co.jp/character/mymelody/',
+      '한교동': 'https://www.sanrio.co.jp/character/hangyodon/',
+      '리틀트윈스타': 'https://www.sanrio.co.jp/character/littletwinstars/',
+      '턱시도샘': 'https://www.sanrio.co.jp/character/tuxedosam/',
+      '아히루노페클': 'https://www.sanrio.co.jp/character/pekkle/',
+      '코기뮹': 'https://www.sanrio.co.jp/character/cogimyun/',
+      '케로케로케로피': 'https://www.sanrio.co.jp/character/keroppi/',
+      '구데타마': 'https://www.sanrio.co.jp/character/gudetama/',
+      '배드바츠마루': 'https://www.sanrio.co.jp/character/badbadtzmaru/',
+      '위시미멜': 'https://www.sanrio.co.jp/character/wishmemell/',
+      '마이스윗피아노': 'https://www.sanrio.co.jp/character/piano/',
+      '키리미짱': 'https://www.sanrio.co.jp/character/kirimichan/',
+      '우사하나': 'https://www.sanrio.co.jp/character/usahana/',
+      '코로코로쿠리링': 'https://www.sanrio.co.jp/character/kuririn/',
+      '마론크림': 'https://www.sanrio.co.jp/character/marroncream/',
+      '디어다니엘': 'https://www.sanrio.co.jp/character/deardaniel/',
+      '챠미키티': 'https://www.sanrio.co.jp/character/charmmykitty/',
+      '본본리본': 'https://www.sanrio.co.jp/character/bonbonribbon/',
+      '슈가바니즈': 'https://www.sanrio.co.jp/character/sugarbunnies/',
+      '어그레시브 레츠코': 'https://www.sanrio.co.jp/character/aggretsuko/',
+      '하나마루오바케': 'https://www.sanrio.co.jp/character/hanamaruobake/'
     };
 
-    function getCharacterImageHTML(characterName, size = 'w-10 h-10', textSize = 'text-sm') {
+    function getOfficialUrl(characterName) {
       const cleanName = characterName.replace(/\(.*\)/g, '').trim();
-      const imgUrl = CHARACTER_IMAGES[cleanName] || CHARACTER_IMAGES[characterName];
-      const initial = cleanName.charAt(0) || '★';
-
-      if (imgUrl) {
-        return `
-          <div class="relative ${size} flex items-center justify-center flex-shrink-0">
-            <img src="${imgUrl}" alt="${characterName}" 
-                 loading="lazy"
-                 onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');" 
-                 class="${size} object-contain rounded-full bg-pink-50/70 p-1 border border-pink-100 char-avatar" />
-            <div class="hidden ${size} rounded-full bg-gradient-to-br from-pink-100 to-pink-200 border border-pink-200 text-sanrio-deepPink font-black flex items-center justify-center ${textSize} shadow-inner char-avatar">
-              ${initial}
-            </div>
-          </div>
-        `;
-      } else {
-        return `
-          <div class="${size} rounded-full bg-gradient-to-br from-pink-100 to-pink-200 border border-pink-200 text-sanrio-deepPink font-black flex items-center justify-center ${textSize} shadow-inner char-avatar flex-shrink-0">
-            ${initial}
-          </div>
-        `;
-      }
+      return SANRIO_OFFICIAL_URLS[cleanName] || SANRIO_OFFICIAL_URLS[characterName] || 'https://www.sanrio.co.jp/character/';
     }
 
-    // Complete 1~10 Vote Counts for 2012 ~ 2026
+    // 캐릭터별 고유 시그니처 상징 심볼(이모지) 및 퍼스널 컬러 팔레트
+    const CHARACTER_META = {
+      '시나모롤': { emoji: '☁️', color: 'from-sky-100 to-blue-200', text: 'text-sky-700', border: 'border-sky-300' },
+      '폼폼푸린': { emoji: '🍮', color: 'from-amber-100 to-yellow-200', text: 'text-amber-800', border: 'border-amber-300' },
+      '포차코': { emoji: '🐾', color: 'from-emerald-100 to-teal-200', text: 'text-emerald-800', border: 'border-emerald-300' },
+      '쿠로미': { emoji: '🖤', color: 'from-purple-100 to-fuchsia-200', text: 'text-purple-800', border: 'border-purple-300' },
+      '헬로키티': { emoji: '🎀', color: 'from-pink-100 to-rose-200', text: 'text-rose-700', border: 'border-rose-300' },
+      '마이멜로디': { emoji: '🌸', color: 'from-rose-100 to-pink-200', text: 'text-pink-700', border: 'border-pink-300' },
+      '한교동': { emoji: '🐟', color: 'from-teal-100 to-cyan-200', text: 'text-teal-800', border: 'border-teal-300' },
+      '리틀트윈스타': { emoji: '⭐', color: 'from-purple-100 to-sky-200', text: 'text-indigo-700', border: 'border-indigo-300' },
+      '턱시도샘': { emoji: '🐧', color: 'from-blue-100 to-indigo-200', text: 'text-blue-800', border: 'border-blue-300' },
+      '아히루노페클': { emoji: '🦆', color: 'from-yellow-100 to-amber-200', text: 'text-amber-700', border: 'border-amber-300' },
+      '코기뮹': { emoji: '🌾', color: 'from-orange-50 to-amber-100', text: 'text-orange-700', border: 'border-orange-200' },
+      '케로케로케로피': { emoji: '🐸', color: 'from-green-100 to-emerald-200', text: 'text-green-800', border: 'border-green-300' },
+      '구데타마': { emoji: '🍳', color: 'from-yellow-100 to-orange-200', text: 'text-yellow-800', border: 'border-yellow-300' },
+      '배드바츠마루': { emoji: '⚡', color: 'from-gray-200 to-slate-300', text: 'text-slate-800', border: 'border-slate-400' },
+      '위시미멜': { emoji: '💌', color: 'from-pink-50 to-purple-100', text: 'text-purple-600', border: 'border-purple-200' },
+      '마이스윗피아노': { emoji: '🐑', color: 'from-pink-100 to-rose-100', text: 'text-pink-600', border: 'border-pink-200' },
+      '키리미짱': { emoji: '🍣', color: 'from-rose-100 to-orange-200', text: 'text-rose-700', border: 'border-rose-300' },
+      '우사하나': { emoji: '🌼', color: 'from-orange-100 to-amber-200', text: 'text-orange-700', border: 'border-orange-300' },
+      '코로코로쿠리링': { emoji: '🐹', color: 'from-amber-100 to-yellow-100', text: 'text-amber-800', border: 'border-amber-200' },
+      '마론크림': { emoji: '👒', color: 'from-red-50 to-pink-100', text: 'text-red-600', border: 'border-red-200' },
+      '디어다니엘': { emoji: '🎩', color: 'from-blue-50 to-sky-100', text: 'text-sky-800', border: 'border-sky-200' },
+      '챠미키티': { emoji: '🐱', color: 'from-pink-50 to-rose-100', text: 'text-pink-700', border: 'border-pink-200' },
+      '본본리본': { emoji: '🎀', color: 'from-pink-100 to-purple-100', text: 'text-purple-700', border: 'border-pink-300' },
+      '슈가바니즈': { emoji: '🐰', color: 'from-amber-50 to-pink-100', text: 'text-pink-800', border: 'border-pink-200' },
+      '어그레시브 레츠코': { emoji: '🎸', color: 'from-red-100 to-amber-200', text: 'text-red-800', border: 'border-red-300' },
+      '하나마루오바케': { emoji: '👻', color: 'from-slate-100 to-pink-100', text: 'text-pink-700', border: 'border-pink-200' }
+    };
+
+    /**
+     * 저작권 침해를 원천 방지하는 100% 안전한 고유 시그니처 상징 심볼 & 컬러 아바타
+     */
+    function getCharacterBadgeHTML(characterName, size = 'w-10 h-10', textSize = 'text-sm') {
+      const cleanName = characterName.replace(/\(.*\)/g, '').trim();
+      const meta = CHARACTER_META[cleanName] || CHARACTER_META[characterName] || {
+        emoji: '★',
+        color: 'from-pink-100 to-pink-200',
+        text: 'text-sanrio-deepPink',
+        border: 'border-pink-200'
+      };
+      const initial = cleanName.charAt(0) || '★';
+
+      return `
+        <div class="${size} rounded-2xl bg-gradient-to-br ${meta.color} border ${meta.border} ${meta.text} flex flex-col items-center justify-center shadow-sm select-none transition transform hover:scale-105 flex-shrink-0">
+          <span class="leading-none text-base">${meta.emoji}</span>
+          <span class="text-[10px] font-black leading-tight opacity-90">${initial}</span>
+        </div>
+      `;
+    }
+
+    // 1위~10위 전체 득표수 데이터 (2012 ~ 2026)
     const DEFAULT_TOP10_VOTES = {
       "2012": { "1": 193685, "2": 178054, "3": 121233, "4": 102324, "5": 101735, "6": 80118, "7": 44931, "8": 40422, "9": 39959, "10": 39421 },
       "2013": { "1": 188697, "2": 179835, "3": 132739, "4": 116511, "5": 79520, "6": 65404, "7": 57652, "8": 57146, "9": 47411, "10": 46916 },
@@ -623,20 +665,27 @@
         const renderPodiumCard = (item, medal, bgColor, borderColor, orderClass) => {
           if (!item) return '';
           const votesStr = item.votes ? item.votes.toLocaleString() + '표' : '득표수 집계 중';
+          const officialUrl = getOfficialUrl(item.name);
           return `
             <div class="${orderClass} ${bgColor} border ${borderColor} rounded-3xl p-5 shadow-sm hover:shadow-md transition text-center relative overflow-hidden flex flex-col justify-between items-center group">
               <div class="text-3xl mb-1">${medal}</div>
               <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">${item.rank}위</div>
-              <div class="my-2 p-1.5 bg-white/80 rounded-2xl shadow-sm border border-pink-100">
-                ${getCharacterImageHTML(item.name, 'w-20 h-20 md:w-24 md:h-24', 'text-2xl')}
+              <div class="my-2.5 p-2 bg-white/90 rounded-2xl shadow-sm border border-pink-100">
+                ${getCharacterBadgeHTML(item.name, 'w-20 h-20 md:w-24 md:h-24', 'text-2xl')}
               </div>
               <h3 class="text-xl md:text-2xl font-black text-gray-800 my-1 group-hover:text-sanrio-deepPink transition">${item.name}</h3>
               <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-pink-200 text-sm font-bold text-sanrio-deepPink shadow-sm mt-1">
                 <span>🗳️</span> ${votesStr}
               </div>
-              <button onclick="viewCharacterHistory('${item.name}')" class="mt-3 text-xs text-gray-500 hover:text-sanrio-deepPink underline transition font-medium">
-                역대 추이 분석 →
-              </button>
+              <div class="mt-3.5 flex flex-col items-center gap-1.5 w-full">
+                <a href="${officialUrl}" target="_blank" rel="noopener noreferrer" 
+                   class="w-full py-1.5 px-3 rounded-xl bg-pink-100/70 hover:bg-sanrio-deepPink hover:text-white text-sanrio-deepPink text-xs font-bold transition shadow-xs flex items-center justify-center gap-1">
+                  <span>산리오 공식 이미지 보기 ↗</span>
+                </a>
+                <button onclick="viewCharacterHistory('${item.name}')" class="text-xs text-gray-500 hover:text-sanrio-deepPink underline transition font-medium">
+                  역대 추이 분석 →
+                </button>
+              </div>
             </div>
           `;
         };
@@ -700,6 +749,7 @@
           `;
         }
 
+        const officialUrl = getOfficialUrl(item.name);
         return `
           <tr class="hover:bg-pink-50/30 transition">
             <td class="py-3 px-4 text-center">
@@ -707,12 +757,19 @@
             </td>
             <td class="py-3 px-3 text-center">${diffBadge}</td>
             <td class="py-3 px-4 text-center">
-              ${getCharacterImageHTML(item.name, 'w-9 h-9 mx-auto', 'text-xs')}
+              ${getCharacterBadgeHTML(item.name, 'w-10 h-10 mx-auto', 'text-xs')}
             </td>
             <td class="py-3 px-6 font-bold text-gray-800">
-              <span class="cursor-pointer hover:text-sanrio-deepPink transition inline-flex items-center gap-1.5" onclick="viewCharacterHistory('${item.name}')">
-                ${item.name}
-              </span>
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="cursor-pointer hover:text-sanrio-deepPink transition text-base" onclick="viewCharacterHistory('${item.name}')">
+                  ${item.name}
+                </span>
+                <a href="${officialUrl}" target="_blank" rel="noopener noreferrer" 
+                   class="text-xs font-medium text-pink-600 hover:text-white hover:bg-sanrio-deepPink bg-pink-50 px-2.5 py-0.5 rounded-full border border-pink-200 transition inline-flex items-center gap-1" 
+                   title="${item.name} 공식 사이트에서 캐릭터 원본 이미지 확인">
+                  <span>공식 이미지 보기 ↗</span>
+                </a>
+              </div>
             </td>
             <td class="py-3 px-6 text-right">${votesContent}</td>
             <td class="py-3 px-6 text-center">
@@ -781,7 +838,18 @@
       const characterName = document.getElementById('characterHistorySelect').value;
       if (!characterName) return;
 
-      document.getElementById('characterHeroAvatar').innerHTML = getCharacterImageHTML(characterName, 'w-14 h-14', 'text-xl');
+      const officialUrl = getOfficialUrl(characterName);
+      document.getElementById('characterHeroAvatar').innerHTML = getCharacterBadgeHTML(characterName, 'w-14 h-14', 'text-xl');
+      const linkContainer = document.getElementById('characterOfficialLinkContainer');
+      if (linkContainer) {
+        linkContainer.innerHTML = `
+          <a href="${officialUrl}" target="_blank" rel="noopener noreferrer" 
+             class="mt-1 text-xs font-bold text-sanrio-deepPink hover:underline inline-flex items-center gap-1 bg-pink-50 px-2.5 py-1 rounded-lg border border-pink-200 shadow-2xs">
+            <span>${characterName} 산리오 공식 프로필 & 원본 이미지 보기 ↗</span>
+          </a>
+        `;
+      }
+
       document.getElementById('chartTitle').innerText = `${characterName} 역대 순위 변동 추이`;
       document.getElementById('voteChartTitle').innerText = `${characterName} TOP 10 득표수 추이`;
 
