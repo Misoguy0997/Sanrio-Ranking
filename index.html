@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
   <title>산리오 캐릭터 대상 랭킹 대시보드</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -80,7 +81,6 @@
 
     <!-- TAB 1: 연도별 순위 & 득표수 -->
     <section id="tabRanking" class="space-y-6">
-      <!-- Filter Bar -->
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-pink-100 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div class="flex items-center gap-3 w-full md:w-auto">
           <label class="font-bold text-gray-700 whitespace-nowrap">📅 연도 선택:</label>
@@ -89,7 +89,6 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          <!-- Rank Limit Filter -->
           <div class="inline-flex rounded-xl p-1 bg-gray-100 text-xs font-semibold">
             <button onclick="setRankLimit(10)" id="filter10" class="px-3.5 py-1.5 rounded-lg bg-white shadow-sm text-sanrio-deepPink font-bold transition flex items-center gap-1">
               <span>🌟</span> TOP 10 (득표수 연동)
@@ -98,7 +97,6 @@
             <button onclick="setRankLimit(100)" id="filter100" class="px-3 py-1.5 rounded-lg text-gray-600 hover:text-gray-900 transition">전체(100)</button>
           </div>
 
-          <!-- Search Input -->
           <div class="relative flex-1 md:w-52">
             <input type="text" id="characterSearch" oninput="renderRankingView()" placeholder="캐릭터 검색..." class="w-full pl-9 pr-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-sanrio-deepPink outline-none">
             <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
@@ -169,10 +167,8 @@
         </div>
       </div>
 
-      <!-- Stats Row -->
       <div id="characterStatsRow" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
 
-      <!-- Line Chart -->
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
         <div class="flex justify-between items-center">
           <h3 class="font-bold text-gray-800 text-base md:text-lg flex items-center gap-2">
@@ -185,7 +181,6 @@
         </div>
       </div>
 
-      <!-- Votes Chart -->
       <div id="votesChartCard" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
         <div class="flex justify-between items-center">
           <h3 class="font-bold text-gray-800 text-base md:text-lg flex items-center gap-2">
@@ -233,7 +228,6 @@
     </div>
   </div>
 
-  <!-- Footer -->
   <footer class="bg-white border-t border-gray-100 py-6 mt-12 text-center text-xs text-gray-400 space-y-1">
     <p>Sanrio Character Ranking Interactive Archive</p>
     <p>데이터 출처: 산리오 공식 캐릭터 대상 & 구글 스프레드시트 실시간 연동</p>
@@ -289,31 +283,45 @@
       const cleanName = characterName.replace(/\(.*\)/g, '').trim();
       const imgUrl = CHARACTER_IMAGES[cleanName] || CHARACTER_IMAGES[characterName];
       const initial = cleanName.charAt(0) || '★';
-      const fallbackSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="%23FFE6EB"/><text x="50%" y="54%" font-family="sans-serif" font-weight="bold" font-size="22" fill="%23FF6584" text-anchor="middle" dominant-baseline="middle">${encodeURIComponent(initial)}</text></svg>`;
 
       if (imgUrl) {
-        return `<img src="${imgUrl}" alt="${characterName}" onerror="this.onerror=null; this.src='${fallbackSvg}';" class="${size} object-contain rounded-full bg-pink-50/60 p-1 border border-pink-100 char-avatar flex-shrink-0" />`;
+        return `
+          <div class="relative ${size} flex items-center justify-center flex-shrink-0">
+            <img src="${imgUrl}" alt="${characterName}" 
+                 loading="lazy"
+                 onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');" 
+                 class="${size} object-contain rounded-full bg-pink-50/70 p-1 border border-pink-100 char-avatar" />
+            <div class="hidden ${size} rounded-full bg-gradient-to-br from-pink-100 to-pink-200 border border-pink-200 text-sanrio-deepPink font-black flex items-center justify-center ${textSize} shadow-inner char-avatar">
+              ${initial}
+            </div>
+          </div>
+        `;
       } else {
-        return `<div class="${size} rounded-full bg-pink-100/70 border border-pink-200 text-sanrio-deepPink font-bold flex items-center justify-center ${textSize} char-avatar flex-shrink-0 shadow-inner">${initial}</div>`;
+        return `
+          <div class="${size} rounded-full bg-gradient-to-br from-pink-100 to-pink-200 border border-pink-200 text-sanrio-deepPink font-black flex items-center justify-center ${textSize} shadow-inner char-avatar flex-shrink-0">
+            ${initial}
+          </div>
+        `;
       }
     }
 
+    // Complete 1~10 Vote Counts for 2012 ~ 2026
     const DEFAULT_TOP10_VOTES = {
-      '2012': { 1: 193685, 2: 178054, 3: 121233, 4: 102324, 5: 101735, 6: 80118, 7: 44931, 8: 40422 },
-      '2013': { 1: 188697, 2: 179835, 3: 132739, 4: 116511, 5: 79520, 6: 65404, 7: 57652, 8: 57146 },
-      '2014': { 1: 79235, 2: 72951, 3: 50323, 4: 47283, 5: 44515, 6: 35426, 7: 33825, 8: 32291 },
-      '2015': { 1: 270837, 2: 270802, 3: 262274, 4: 223336, 5: 203883, 6: 185381, 7: 143342, 8: 142673 },
-      '2016': { 1: 807389, 2: 730207, 3: 632662, 4: 545268, 5: 519113, 6: 377873, 7: 307105, 8: 225169 },
-      '2017': { 1: 656154, 2: 473249, 3: 338849, 4: 273576, 5: 239254, 6: 237462, 7: 197328, 8: 158269 },
-      '2018': { 1: 520224, 2: 500188, 3: 465907, 4: 327245, 5: 297335, 6: 261395, 7: 254408, 8: 219792 },
-      '2019': { 1: 1647073, 2: 1584057, 3: 1221788, 4: 1022381, 5: 966763, 6: 664565, 7: 509088, 8: 469184 },
-      '2020': { 1: 1387152, 2: 1288245, 3: 1013927, 4: 883485, 5: 839904, 6: 675706, 7: 661284, 8: 602105 },
-      '2021': { 1: 2314222, 2: 2166543, 3: 1468247, 4: 1422881, 5: 1248520, 6: 1144265, 7: 916505, 8: 872077 },
-      '2022': { 1: 2896171, 2: 2351265, 3: 1954948, 4: 1947297, 5: 1700858, 6: 1471242, 7: 1020516, 8: 996854 },
-      '2023': { 1: 4376064, 2: 3695478, 3: 3566050, 4: 3200540, 5: 2496850, 6: 2264895, 7: 1839694, 8: 1518114 },
-      '2024': { 1: 5665543, 2: 4591020, 3: 4125678, 4: 4089750, 5: 3551441, 6: 2723108, 7: 2244819, 8: 2118662 },
-      '2025': { 1: 5613659, 2: 5427983, 3: 3935101, 4: 3652492, 5: 3349642, 6: 2547302, 7: 2282015, 8: 2243702 },
-      '2026': { 1: 7135114, 2: 6313623, 3: 3967689, 4: 3792049, 5: 3492847, 6: 3030030, 7: 2975439, 8: 2565388 }
+      "2012": { "1": 193685, "2": 178054, "3": 121233, "4": 102324, "5": 101735, "6": 80118, "7": 44931, "8": 40422, "9": 39959, "10": 39421 },
+      "2013": { "1": 188697, "2": 179835, "3": 132739, "4": 116511, "5": 79520, "6": 65404, "7": 57652, "8": 57146, "9": 47411, "10": 46916 },
+      "2014": { "1": 79235, "2": 72951, "3": 50323, "4": 47283, "5": 44515, "6": 35426, "7": 33825, "8": 32291, "9": 31614, "10": 31270 },
+      "2015": { "1": 270837, "2": 270802, "3": 262274, "4": 223336, "5": 203883, "6": 185381, "7": 143342, "8": 142673, "9": 138926, "10": 127936 },
+      "2016": { "1": 807389, "2": 730207, "3": 632662, "4": 545268, "5": 519113, "6": 377873, "7": 307105, "8": 225169, "9": 171846, "10": 153806 },
+      "2017": { "1": 656154, "2": 473249, "3": 338849, "4": 273576, "5": 239254, "6": 237462, "7": 197328, "8": 158269, "9": 147183, "10": 127971 },
+      "2018": { "1": 520224, "2": 500188, "3": 465907, "4": 327245, "5": 297335, "6": 261395, "7": 254408, "8": 219792, "9": 139775, "10": 126827 },
+      "2019": { "1": 1647073, "2": 1584057, "3": 1221788, "4": 1022381, "5": 966763, "6": 664565, "7": 509088, "8": 469184, "9": 422542, "10": 364440 },
+      "2020": { "1": 1387152, "2": 1288245, "3": 1013927, "4": 883485, "5": 839904, "6": 675706, "7": 661284, "8": 602105, "9": 558927, "10": 428826 },
+      "2021": { "1": 2314222, "2": 2166543, "3": 1468247, "4": 1422881, "5": 1248520, "6": 1144265, "7": 916505, "8": 872077, "9": 710480, "10": 703170 },
+      "2022": { "1": 2896171, "2": 2351265, "3": 1954948, "4": 1947297, "5": 1700858, "6": 1471242, "7": 1020516, "8": 996854, "9": 931628, "10": 903566 },
+      "2023": { "1": 4376064, "2": 3695478, "3": 3566050, "4": 3200540, "5": 2496850, "6": 2264895, "7": 1839694, "8": 1518114, "9": 1513085, "10": 1457693 },
+      "2024": { "1": 5665543, "2": 4591020, "3": 4125678, "4": 4089750, "5": 3551441, "6": 2723108, "7": 2244819, "8": 2118662, "9": 1925732, "10": 1849224 },
+      "2025": { "1": 5613659, "2": 5427983, "3": 3935101, "4": 3652492, "5": 3349642, "6": 2547302, "7": 2282015, "8": 2243702, "9": 2082914, "10": 2032405 },
+      "2026": { "1": 7135114, "2": 6313623, "3": 3967689, "4": 3792049, "5": 3492847, "6": 3030030, "7": 2975439, "8": 2565388, "9": 2485501, "10": 2479692 }
     };
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -393,26 +401,17 @@
         let rankingRows = null;
         let votesRows = null;
 
-        try {
-          rankingRows = await fetchSheetCSV(SHEET_RANKING);
-        } catch (e) {
-          console.warn('Rank sheet fetch failed:', e);
-        }
-
-        try {
-          votesRows = await fetchSheetCSV(SHEET_VOTES);
-        } catch (e) {
-          console.warn('Votes sheet fetch failed:', e);
-        }
+        try { rankingRows = await fetchSheetCSV(SHEET_RANKING); } catch (e) { console.warn(e); }
+        try { votesRows = await fetchSheetCSV(SHEET_VOTES); } catch (e) { console.warn(e); }
 
         if (rankingRows && rankingRows.length > 2) {
           processData(rankingRows, votesRows);
           hideStatus();
         } else {
-          throw new Error('스프레드시트 데이터를 읽을 수 없습니다.');
+          throw new Error('시트 데이터를 불러오지 못했습니다.');
         }
       } catch (err) {
-        console.warn('Google Sheets live fetch error:', err);
+        console.warn('Live fetch warning:', err);
         showStatus(`실시간 시트 로드 실패: ${err.message}. 백업 데이터를 표시합니다.`, true);
         loadFallbackData();
       }
@@ -508,9 +507,7 @@
       renderHistoryView();
     }
 
-    function str(val) {
-      return (val || '').toString();
-    }
+    function str(val) { return (val || '').toString(); }
 
     function populateYearSelector() {
       const yearSelect = document.getElementById('yearSelect');
@@ -666,7 +663,7 @@
 
       const maxVotes = list.reduce((max, item) => (item.votes && item.votes > max ? item.votes : max), 0);
 
-      // Render Ranking Table
+      // Render Table
       const tbody = document.getElementById('rankingTableBody');
       if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-gray-400">검색 결과가 없습니다.</td></tr>`;
@@ -925,10 +922,24 @@
           { rank: 5, name: '헬로키티', votes: 3492847 },
           { rank: 6, name: '아히루노페클', votes: 3030030 },
           { rank: 7, name: '마이멜로디', votes: 2975439 },
-          { rank: 8, name: '턱시도샘', votes: 2565388 }
+          { rank: 8, name: '턱시도샘', votes: 2565388 },
+          { rank: 9, name: '한교동', votes: 2485501 },
+          { rank: 10, name: '리틀트윈스타', votes: 2479692 }
+        ],
+        '2025': [
+          { rank: 1, name: '폼폼푸린', votes: 5613659 },
+          { rank: 2, name: '시나모롤', votes: 5427983 },
+          { rank: 3, name: '포차코', votes: 3935101 },
+          { rank: 4, name: '쿠로미', votes: 3652492 },
+          { rank: 5, name: '헬로키티', votes: 3349642 },
+          { rank: 6, name: '마이멜로디', votes: 2547302 },
+          { rank: 7, name: '리틀트윈스타', votes: 2282015 },
+          { rank: 8, name: '한교동', votes: 2243702 },
+          { rank: 9, name: '턱시도샘', votes: 2082914 },
+          { rank: 10, name: '아히루노페클', votes: 2032405 }
         ]
       };
-      characterSet = new Set(['폼폼푸린', '시나모롤', '포차코', '쿠로미', '헬로키티', '마이멜로디', '아히루노페클', '턱시도샘']);
+      characterSet = new Set(['폼폼푸린', '시나모롤', '포차코', '쿠로미', '헬로키티', '마이멜로디', '한교동', '리틀트윈스타', '턱시도샘', '아히루노페클']);
       populateYearSelector();
       populateCharacterSelector();
       renderRankingView();
